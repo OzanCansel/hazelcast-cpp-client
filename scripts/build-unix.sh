@@ -31,7 +31,7 @@ fi
 CXXFLAGS="$CXXFLAGS -Wall"
 
 if [ "$WARN_AS_ERR" = "ON" ]; then
-  CXXFLAGS="$CXXFLAGS -Werror"
+  CXXFLAGS="$CXXFLAGS -Werror -Wno-#warnings"
 fi
 
 # remove the given build directory if already exists
