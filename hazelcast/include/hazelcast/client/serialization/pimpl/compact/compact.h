@@ -24,6 +24,7 @@
 #include "hazelcast/util/export.h"
 #include "hazelcast/client/serialization/serialization.h"
 #include "hazelcast/util/SynchronizedMap.h"
+#include "hazelcast/client/serialization/field_kind.h"
 
 #if defined(WIN32) || defined(_WIN32) || defined(WIN64) || defined(_WIN64)
 #pragma warning(push)
@@ -32,6 +33,10 @@
 
 namespace hazelcast {
 namespace client {
+namespace spi {
+class ClientContext;
+}
+
 namespace serialization {
 class compact_reader;
 class compact_writer;
@@ -49,53 +54,6 @@ create_compact_reader(
   object_data_input& object_data_input,
   const pimpl::schema& schema);
 struct field_descriptor;
-enum HAZELCAST_API field_kind
-{
-    BOOLEAN = 0,
-    ARRAY_OF_BOOLEAN = 1,
-    INT8 = 2,
-    ARRAY_OF_INT8 = 3,
-    INT16 = 6,
-    ARRAY_OF_INT16 = 7,
-    INT32 = 8,
-    ARRAY_OF_INT32 = 9,
-    INT64 = 10,
-    ARRAY_OF_INT64 = 11,
-    FLOAT32 = 12,
-    ARRAY_OF_FLOAT32 = 13,
-    FLOAT64 = 14,
-    ARRAY_OF_FLOAT64 = 15,
-    STRING = 16,
-    ARRAY_OF_STRING = 17,
-    DECIMAL = 18,
-    ARRAY_OF_DECIMAL = 19,
-    TIME = 20,
-    ARRAY_OF_TIME = 21,
-    DATE = 22,
-    ARRAY_OF_DATE = 23,
-    TIMESTAMP = 24,
-    ARRAY_OF_TIMESTAMP = 25,
-    TIMESTAMP_WITH_TIMEZONE = 26,
-    ARRAY_OF_TIMESTAMP_WITH_TIMEZONE = 27,
-    COMPACT = 28,
-    ARRAY_OF_COMPACT = 29,
-    NULLABLE_BOOLEAN = 32,
-    ARRAY_OF_NULLABLE_BOOLEAN = 33,
-    NULLABLE_INT8 = 34,
-    ARRAY_OF_NULLABLE_INT8 = 35,
-    NULLABLE_INT16 = 36,
-    ARRAY_OF_NULLABLE_INT16 = 37,
-    NULLABLE_INT32 = 38,
-    ARRAY_OF_NULLABLE_INT32 = 39,
-    NULLABLE_INT64 = 40,
-    ARRAY_OF_NULLABLE_INT64 = 41,
-    NULLABLE_FLOAT32 = 42,
-    ARRAY_OF_NULLABLE_FLOAT32 = 43,
-    NULLABLE_FLOAT64 = 44,
-    ARRAY_OF_NULLABLE_FLOAT64 = 45,
-};
-static const int NUMBER_OF_FIELD_KINDS = ARRAY_OF_NULLABLE_FLOAT64 + 1;
-
 } // namespace pimpl
 
 /**
@@ -633,24 +591,24 @@ private:
       const pimpl::schema& schema);
     template<typename T>
     T read_primitive(const std::string& field_name,
-                     enum pimpl::field_kind field_kind,
-                     enum pimpl::field_kind nullable_field_kind,
+                     field_kind kind,
+                     field_kind nullable_kind,
                      const std::string& method_suffix);
     template<typename T>
     T read_primitive(const pimpl::field_descriptor& field_descriptor);
     bool is_field_exists(const std::string& field_name,
-                         enum pimpl::field_kind kind) const;
+                         field_kind kind) const;
     const pimpl::field_descriptor& get_field_descriptor(
       const std::string& field_name) const;
     const pimpl::field_descriptor& get_field_descriptor(
       const std::string& field_name,
-      enum pimpl::field_kind field_kind) const;
+      field_kind field_kind) const;
     template<typename T>
     boost::optional<T> read_variable_size(
       const pimpl::field_descriptor& field_descriptor);
     template<typename T>
     boost::optional<T> read_variable_size(const std::string& field_name,
-                                          enum pimpl::field_kind field_kind);
+                                          field_kind field_kind);
     template<typename T>
     T read_variable_size_as_non_null(
       const pimpl::field_descriptor& field_descriptor,
@@ -711,8 +669,8 @@ private:
     template<typename T>
     boost::optional<T> read_array_of_primitive(
       const std::string& field_name,
-      enum pimpl::field_kind field_kind,
-      enum pimpl::field_kind nullable_field_kind,
+      field_kind kind,
+      field_kind nullable_kind,
       const std::string& method_suffix);
     template<typename T>
     boost::optional<std::vector<boost::optional<T>>>
@@ -731,13 +689,13 @@ private:
     template<typename T>
     boost::optional<T> read_nullable_primitive(
       const std::string& field_name,
-      enum pimpl::field_kind field_kind,
-      enum pimpl::field_kind nullable_field_kind);
+      field_kind kind,
+      field_kind nullable_kind);
     template<typename T>
     boost::optional<std::vector<boost::optional<T>>> read_array_of_nullable(
       const std::string& field_name,
-      enum pimpl::field_kind field_kind,
-      enum pimpl::field_kind nullable_field_kind);
+      field_kind kind,
+      field_kind nullable_kind);
     template<typename T>
     boost::optional<std::vector<boost::optional<T>>>
     read_primitive_array_as_nullable_array(
@@ -751,7 +709,7 @@ private:
     exception::hazelcast_serialization unknown_field(
       const std::string& field_name) const;
     exception::hazelcast_serialization unexpected_field_kind(
-      enum pimpl::field_kind field_kind,
+      field_kind kind,
       const std::string& field_name) const;
     static exception::hazelcast_serialization unexpected_null_value(
       const std::string& field_name,
@@ -1405,50 +1363,6 @@ private:
     std::vector<int32_t> field_offsets;
 };
 
-struct HAZELCAST_API field_descriptor
-{
-    enum field_kind field_kind;
-    /**
-     * Index of the offset of the non-primitive field. For others, it is -1
-     */
-    int32_t index;
-    /**
-     * Applicable only for primitive fields. For others, it is -1
-     */
-    int32_t offset;
-    /**
-     * Applicable only for boolean field. For others, it is -1
-     */
-    int8_t bit_offset;
-};
-
-std::ostream&
-operator<<(std::ostream& os, const field_descriptor& field_descriptor);
-
-class HAZELCAST_API schema
-{
-public:
-    schema() = default;
-    schema(
-      std::string type_name,
-      std::unordered_map<std::string, field_descriptor>&& field_definition_map);
-    int64_t schema_id() const;
-    size_t number_of_var_size_fields() const;
-    size_t fixed_size_fields_length() const;
-    const std::string& type_name() const;
-    const std::unordered_map<std::string, field_descriptor>& fields() const;
-
-private:
-    std::string type_name_;
-    std::unordered_map<std::string, field_descriptor> field_definition_map_;
-    size_t number_of_var_size_fields_{};
-    size_t fixed_size_fields_length_{};
-    int64_t schema_id_{};
-};
-
-std::ostream&
-operator<<(std::ostream& os, const schema& schema);
-
 } // namespace pimpl
 
 namespace pimpl {
@@ -1470,6 +1384,17 @@ private:
 class HAZELCAST_API default_schema_service
 {
 public:
+
+    static constexpr const char* SERVICE_NAME = "schema-service";
+    /**
+     * Maximum number of attempts for schema replication process.
+    */
+    static constexpr const char* MAX_PUT_RETRY_COUNT =
+      "hazelcast.client.schema.max.put.retry.count";
+    static constexpr const char* MAX_PUT_RETRY_COUNT_DEFAULT = "100";
+
+    default_schema_service(spi::ClientContext&);
+
     /**
      * Gets the schema with the given id either by
      * <ul>
@@ -1480,25 +1405,37 @@ public:
     schema get(int64_t schemaId);
 
     /**
-     * Puts the schema with the given id to the cluster.
-     */
-    void put(const schema& schema);
+     * Replicates schema on the cluster
+    */
+    boost::future<void> replicate_schema(schema);
+
+    void check_schema_replicated(const schema&);
 
 private:
+
+    boost::future<void> replicate_schema_attempt(schema, int attempts = 0);
+
+    int retry_pause_millis_;
+    int max_put_retry_count_;
+    spi::ClientContext& context_;
     util::SynchronizedMap<int64_t, schema> schemas;
 };
 
 class HAZELCAST_API compact_stream_serializer
 {
 public:
+
+    compact_stream_serializer(spi::ClientContext&);
+
     template<typename T>
     T read(object_data_input& in);
 
     template<typename T>
     void write(const T& object, object_data_output& out);
 
+    boost::future<void> replicate_schema(const schema&);
+
 private:
-    void put_to_schema_service(const schema& schema);
 
     default_schema_service schema_service;
 };

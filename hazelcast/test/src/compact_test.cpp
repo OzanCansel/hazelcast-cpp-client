@@ -26,6 +26,8 @@
 
 #include <hazelcast/client/serialization/serialization.h>
 
+#include "TestHelperFunctions.h"
+
 #if defined(WIN32) || defined(_WIN32) || defined(WIN64) || defined(_WIN64)
 #pragma warning(push)
 #pragma warning(disable : 4996) // for unsafe getenv
@@ -648,7 +650,7 @@ public:
 TEST_F(CompactSerializationTest, testAllTypes)
 {
     serialization_config config;
-    SerializationService ss(config);
+    SerializationService ss(config, null_context());
 
     auto expected = create_main_dto();
     auto actual = to_data_and_back_to_object(ss, expected);
@@ -658,7 +660,7 @@ TEST_F(CompactSerializationTest, testAllTypes)
 TEST_F(CompactSerializationTest, testRecursive)
 {
     serialization_config config;
-    SerializationService ss(config);
+    SerializationService ss(config, null_context());
 
     auto n2 = std::make_shared<node_dto>(node_dto{ 2, nullptr });
     auto n1 = std::make_shared<node_dto>(node_dto{ 1, n2 });
@@ -670,7 +672,7 @@ TEST_F(CompactSerializationTest, testRecursive)
 TEST_F(CompactSerializationTest, testBits)
 {
     serialization_config config;
-    SerializationService ss(config);
+    SerializationService ss(config, null_context());
 
     bits_dto expected;
     expected.a = true;
@@ -717,6 +719,8 @@ TEST_F(CompactSerializationTest, test_field_order_fixed_size)
 
 TEST_F(CompactSerializationTest, test_schema_writer_counts)
 {
+    using serialization::field_kind;
+
     schema_writer schema_writer("typename");
     schema_writer.add_field("int1", field_kind::INT32);
     schema_writer.add_field("int2", field_kind::INT32);
@@ -921,7 +925,7 @@ TEST_F(CompactNullablePrimitiveInteroperabilityTest,
         boost::make_optional(std::vector<double>{ 41231.32, 2 })
     };
     serialization_config config;
-    SerializationService ss(config);
+    SerializationService ss(config, null_context());
 
     const data& data = ss.to_data(expected);
     auto actual = ss.to_object<nullable_primitive_object>(data).value();
@@ -981,7 +985,7 @@ TEST_F(CompactNullablePrimitiveInteroperabilityTest,
             boost::make_optional<double>(2) })
     };
     serialization_config config;
-    SerializationService ss(config);
+    SerializationService ss(config, null_context());
 
     const data& data = ss.to_data(expected);
     auto actual = ss.to_object<primitive_object>(data).value();
@@ -1006,7 +1010,7 @@ TEST_F(CompactNullablePrimitiveInteroperabilityTest,
 {
     nullable_primitive_object expected;
     serialization_config config;
-    SerializationService ss(config);
+    SerializationService ss(config, null_context());
 
     const data& data = ss.to_data(expected);
     ASSERT_THROW(ss.to_object<primitive_object>(data),
