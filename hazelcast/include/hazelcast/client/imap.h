@@ -78,7 +78,12 @@ public:
     template<typename K>
     boost::future<bool> contains_key(const K& key)
     {
-        return contains_key_internal(to_data(key));
+        return controlled_serialization(
+            [this](const K& key){
+                return contains_key_internal(to_data(key));
+            } ,
+            key
+        );
     }
 
     /**
@@ -134,7 +139,14 @@ public:
                                           const V& value,
                                           std::chrono::milliseconds ttl)
     {
-        return to_object<R>(put_internal(to_data(key), to_data(value), ttl));
+        return controlled_serialization(
+            [this](const K& key, const V& value, std::chrono::milliseconds ttl){
+                return to_object<R>(put_internal(to_data(key), to_data(value), ttl));
+            } ,
+            key,
+            value,
+            ttl
+        );
     }
 
     /**

@@ -20,6 +20,7 @@
 
 #include "hazelcast/client/exception/iexception.h"
 #include "hazelcast/client/protocol/ClientProtocolErrorCodes.h"
+#include "hazelcast/client/serialization/pimpl/compact/schema.h"
 
 #if defined(WIN32) || defined(_WIN32) || defined(WIN64) || defined(_WIN64)
 #pragma warning(push)
@@ -374,6 +375,18 @@ public:
                               std::string message = "",
                               std::string details = "",
                               std::exception_ptr cause = nullptr);
+};
+
+class HAZELCAST_API schema_not_replicated : public hazelcast_
+{
+public:
+    explicit schema_not_replicated(const std::string& source = "",
+                                   const std::string& message = "",
+                                   serialization::pimpl::schema  schema = {});
+
+    const serialization::pimpl::schema& schema() const;
+private:
+    serialization::pimpl::schema schema_;
 };
 
 DEFINE_EXCEPTION_CLASS(hazelcast_client_not_active,

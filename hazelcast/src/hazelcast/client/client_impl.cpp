@@ -161,7 +161,7 @@ hazelcast_client_instance_impl::hazelcast_client_instance_impl(
   : client_config_(std::move(config))
   , client_properties_(client_config_.get_properties())
   , client_context_(*this)
-  , serialization_service_(client_config_.get_serialization_config())
+  , serialization_service_(client_config_.get_serialization_config(), client_context_)
   , cluster_service_(client_context_)
   , transaction_manager_(client_context_)
   , cluster_(cluster_service_)
@@ -1318,6 +1318,25 @@ consistency_lost::consistency_lost(std::string source,
                true,
                false)
 {}
+
+schema_not_replicated::schema_not_replicated(const std::string& source ,
+                                             const std::string& message ,
+                                             serialization::pimpl::schema sch)
+    :   hazelcast_ ("schema_not_replicated",
+                     protocol::SCHEMA_NOT_REPLICATED,
+                     source,
+                     message,
+                     "",
+                     nullptr,
+                     true,
+                     true)
+    ,   schema_{std::move(sch)}
+{}
+
+const serialization::pimpl::schema& schema_not_replicated::schema() const
+{
+    return schema_;
+}
 
 query::query(std::string source,
              std::string message,
