@@ -1799,7 +1799,7 @@ private:
 } // namespace client
 } // namespace hazelcast
 
-#include "hazelcast/client/serialization/pimpl/compact.h"
+#include "hazelcast/client/serialization/pimpl/compact/compact.h"
 
 namespace hazelcast {
 namespace client {
@@ -1808,7 +1808,7 @@ namespace pimpl {
 class HAZELCAST_API SerializationService : public util::Disposable
 {
 public:
-    SerializationService(const serialization_config& config);
+    SerializationService(const serialization_config& config, spi::ClientContext&);
 
     PortableSerializer& get_portable_serializer();
 
@@ -2856,7 +2856,7 @@ typed_data::get() const
 } // namespace client
 } // namespace hazelcast
 
-#include "hazelcast/client/serialization/pimpl/compact.i.h"
+#include "hazelcast/client/serialization/pimpl/compact/compact_impl.h"
 
 #if defined(WIN32) || defined(_WIN32) || defined(WIN64) || defined(_WIN64)
 #pragma warning(pop)

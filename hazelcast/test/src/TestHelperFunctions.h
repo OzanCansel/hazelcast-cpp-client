@@ -16,6 +16,15 @@
 
 #pragma once
 
+#include "hazelcast/client/spi/ClientContext.h"
+
+inline
+hazelcast::client::spi::ClientContext&
+null_context()
+{
+    return *static_cast<hazelcast::client::spi::ClientContext*>(nullptr);
+}
+
 #define ASSERT_EQ_EVENTUALLY_WITH_TIMEOUT_MSG(                                 \
   message, expected, actual, timeoutSeconds)                                   \
     do {                                                                       \
