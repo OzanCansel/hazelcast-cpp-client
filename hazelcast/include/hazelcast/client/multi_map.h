@@ -47,7 +47,13 @@ public:
     template<typename K, typename V>
     boost::future<bool> put(const K& key, const V& value)
     {
-        return proxy::MultiMapImpl::put(to_data(key), to_data(value));
+        return controlled_serialization(
+            [this](const K& key, const V& value){
+                return proxy::MultiMapImpl::put(to_data(key), to_data(value));
+            },
+            key,
+            value
+        );
     }
 
     /**
@@ -59,7 +65,16 @@ public:
     template<typename K, typename V>
     boost::future<std::vector<V>> get(const K& key)
     {
-        return to_object_vector<V>(proxy::MultiMapImpl::get_data(to_data(key)));
+        return controlled_serialization(
+            [this](const K& key){
+                return to_object_vector<V>(
+                    proxy::MultiMapImpl::get_data(
+                        to_data(key)
+                    )
+                );
+            },
+            key
+        );
     }
 
     /**
@@ -73,7 +88,16 @@ public:
     template<typename K, typename V>
     boost::future<bool> remove(const K& key, const V& value)
     {
-        return proxy::MultiMapImpl::remove(to_data(key), to_data(value));
+        return controlled_serialization(
+            [this](const K& key, const V& value){
+                return proxy::MultiMapImpl::remove(
+                    to_data(key),
+                    to_data(value)
+                );
+            },
+            key,
+            value
+        );
     }
 
     /**
@@ -87,8 +111,16 @@ public:
     template<typename K, typename V>
     boost::future<std::vector<V>> remove(const K& key)
     {
-        return to_object_vector<V>(
-          proxy::MultiMapImpl::remove_data(to_data(key)));
+        return controlled_serialization(
+            [this](const K& key){
+                return to_object_vector<V>(
+                    proxy::MultiMapImpl::remove_data(
+                        to_data(key)
+                    )
+                );
+            },
+            key
+        );
     }
 
     /**
@@ -138,7 +170,14 @@ public:
     template<typename K>
     boost::future<bool> contains_key(const K& key)
     {
-        return proxy::MultiMapImpl::contains_key(to_data(key));
+        return controlled_serialization(
+            [this](const K& key){
+                return proxy::MultiMapImpl::contains_key(
+                    to_data(key)
+                );
+            },
+            key
+        );
     }
 
     /**
@@ -151,7 +190,14 @@ public:
     template<typename V>
     boost::future<bool> contains_value(const V& value)
     {
-        return proxy::MultiMapImpl::contains_value(to_data(value));
+        return controlled_serialization(
+            [this](const V& value){
+                return proxy::MultiMapImpl::contains_value(
+                    to_data(value)
+                );
+            },
+            value
+        );
     }
 
     /**
@@ -165,8 +211,16 @@ public:
     template<typename K, typename V>
     boost::future<bool> contains_entry(const K& key, const V& value)
     {
-        return proxy::MultiMapImpl::contains_entry(to_data(key),
-                                                   to_data(value));
+        return controlled_serialization(
+            [this](const K& key, const V& value){
+                return proxy::MultiMapImpl::contains_entry(
+                    to_data(key),
+                    to_data(value)
+                );
+            },
+            key,
+            value
+        );
     }
 
     /**
@@ -179,7 +233,12 @@ public:
     template<typename K>
     boost::future<int> value_count(const K& key)
     {
-        return proxy::MultiMapImpl::value_count(to_data(key));
+        return controlled_serialization(
+            [this](const K& key){
+                return proxy::MultiMapImpl::value_count(to_data(key));
+            },
+            key
+        );
     }
 
     /**
@@ -235,18 +294,29 @@ public:
       const K& key,
       bool include_value)
     {
-        return proxy::MultiMapImpl::add_entry_listener(
-          std::shared_ptr<impl::BaseEventHandler>(
-            new impl::EntryEventHandler<
-              protocol::codec::multimap_addentrylistenertokey_handler>(
-              get_name(),
-              get_context().get_client_cluster_service(),
-              get_context().get_serialization_service(),
-              std::move(listener),
-              include_value,
-              get_context().get_logger())),
-          include_value,
-          to_data(key));
+        return controlled_serialization(
+            [this](entry_listener listener, const K& key, bool include_value){
+                return proxy::MultiMapImpl::add_entry_listener(
+                    std::shared_ptr<impl::BaseEventHandler>(
+                        new impl::EntryEventHandler<
+                                protocol::codec::multimap_addentrylistenertokey_handler
+                            >(
+                            get_name(),
+                            get_context().get_client_cluster_service(),
+                            get_context().get_serialization_service(),
+                            std::move(listener),
+                            include_value,
+                            get_context().get_logger()
+                        )
+                    ),
+                    include_value,
+                    to_data(key)
+                );
+            },
+            listener,
+            key,
+            include_value
+        );
     }
 
     /**
@@ -267,7 +337,12 @@ public:
     template<typename K>
     boost::future<void> lock(const K& key)
     {
-        return proxy::MultiMapImpl::lock(to_data(key));
+        return controlled_serialization(
+            [this](const K& key){
+                return proxy::MultiMapImpl::lock(to_data(key));
+            },
+            key
+        );
     }
 
     /**
@@ -289,7 +364,16 @@ public:
     template<typename K>
     boost::future<void> lock(const K& key, std::chrono::milliseconds lease_time)
     {
-        return proxy::MultiMapImpl::lock(to_data(key), lease_time);
+        return controlled_serialization(
+            [this](const K& key, std::chrono::milliseconds lease_time){
+                return proxy::MultiMapImpl::lock(
+                    to_data(key),
+                    lease_time
+                );
+            },
+            key,
+            lease_time
+        );
     }
 
     /**
@@ -302,7 +386,14 @@ public:
     template<typename K>
     boost::future<bool> is_locked(const K& key)
     {
-        return proxy::MultiMapImpl::is_locked(to_data(key));
+        return controlled_serialization(
+            [this](const K& key){
+                return proxy::MultiMapImpl::is_locked(
+                    to_data(key)
+                );
+            },
+            key
+        );
     }
 
     /**
@@ -317,7 +408,14 @@ public:
     template<typename K>
     boost::future<bool> try_lock(const K& key)
     {
-        return proxy::MultiMapImpl::try_lock(to_data(key));
+        return controlled_serialization(
+            [this](const K& key){
+                return proxy::MultiMapImpl::try_lock(
+                    to_data(key)
+                );
+            },
+            key
+        );
     }
 
     /**
@@ -340,7 +438,16 @@ public:
     boost::future<bool> try_lock(const K& key,
                                  std::chrono::milliseconds timeout)
     {
-        return proxy::MultiMapImpl::try_lock(to_data(key), timeout);
+        return controlled_serialization(
+            [this](const K& key, std::chrono::milliseconds timeout){
+                return proxy::MultiMapImpl::try_lock(
+                    to_data(key),
+                    timeout
+                );
+            },
+            key,
+            timeout
+        );
     }
 
     /**
@@ -365,7 +472,18 @@ public:
                                  std::chrono::milliseconds timeout,
                                  std::chrono::milliseconds lease_time)
     {
-        return proxy::MultiMapImpl::try_lock(to_data(key), timeout, lease_time);
+        return controlled_serialization(
+            [this](const K& key, std::chrono::milliseconds timeout, std::chrono::milliseconds lease_time){
+                return proxy::MultiMapImpl::try_lock(
+                    to_data(key),
+                    timeout,
+                    lease_time
+                );
+            },
+            key,
+            timeout,
+            lease_time
+        );
     }
 
     /**
@@ -378,7 +496,14 @@ public:
     template<typename K>
     boost::future<void> unlock(const K& key)
     {
-        return proxy::MultiMapImpl::unlock(to_data(key));
+        return controlled_serialization(
+            [this](const K& key){
+                return proxy::MultiMapImpl::unlock(
+                    to_data(key)
+                );
+            },
+            key
+        );
     }
 
     /**
@@ -390,7 +515,14 @@ public:
     template<typename K>
     boost::future<void> force_unlock(const K& key)
     {
-        return proxy::MultiMapImpl::force_unlock(to_data(key));
+        return controlled_serialization(
+            [this](const K& key){
+                return proxy::MultiMapImpl::force_unlock(
+                    to_data(key)
+                );
+            },
+            key
+        );
     }
 
 private:

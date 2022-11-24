@@ -69,7 +69,12 @@ public:
     template<typename E>
     boost::future<bool> contains(const E& element)
     {
-        return proxy::ISetImpl::contains(to_data(element));
+        return controlled_serialization(
+            [this](const E& element){
+                return proxy::ISetImpl::contains(to_data(element));
+            },
+            element
+        );
     }
 
     /**
@@ -91,7 +96,12 @@ public:
     template<typename E>
     boost::future<bool> add(const E& element)
     {
-        return proxy::ISetImpl::add(to_data(element));
+        return controlled_serialization(
+            [this](const E& element){
+                return proxy::ISetImpl::add(to_data(element));
+            },
+            element
+        );
     }
 
     /**
@@ -102,7 +112,12 @@ public:
     template<typename E>
     boost::future<bool> remove(const E& element)
     {
-        return proxy::ISetImpl::remove(to_data(element));
+        return controlled_serialization(
+            [this](const E& element){
+                return proxy::ISetImpl::remove(to_data(element));
+            },
+            element
+        );
     }
 
     /**

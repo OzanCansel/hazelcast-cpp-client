@@ -54,7 +54,14 @@ public:
     template<typename E>
     boost::future<void> publish(const E& message)
     {
-        return proxy::ITopicImpl::publish(to_data<E>(message));
+        return controlled_serialization(
+            [this](const E& message){
+                return proxy::ITopicImpl::publish(
+                    to_data<E>(message)
+                );
+            },
+            message
+        );
     }
 
     /**

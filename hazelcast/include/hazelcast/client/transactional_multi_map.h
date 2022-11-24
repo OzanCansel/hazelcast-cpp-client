@@ -39,8 +39,16 @@ public:
     template<typename K, typename V>
     boost::future<bool> put(const K& key, const V& value)
     {
-        return proxy::TransactionalMultiMapImpl::put_data(to_data(key),
-                                                          to_data(value));
+        return controlled_serialization(
+            [this](const K& key, const V& value){
+                return proxy::TransactionalMultiMapImpl::put_data(
+                    to_data(key),
+                    to_data(value)
+                );
+            },
+            key,
+            value
+        );
     }
 
     /**
@@ -51,8 +59,16 @@ public:
     template<typename K, typename V>
     boost::future<std::vector<V>> get(const K& key)
     {
-        return to_object_vector<V>(
-          proxy::TransactionalMultiMapImpl::get_data(to_data(key)));
+        return controlled_serialization(
+            [this](const K& key){
+                return to_object_vector<V>(
+                    proxy::TransactionalMultiMapImpl::get_data(
+                        to_data(key)
+                    )
+                );
+            },
+            key
+        );
     }
 
     /**
@@ -63,8 +79,16 @@ public:
     template<typename K, typename V>
     boost::future<bool> remove(const K& key, const V& value)
     {
-        return proxy::TransactionalMultiMapImpl::remove(to_data(key),
-                                                        to_data(value));
+        return controlled_serialization(
+            [this](const K& key, const V& value){
+                return proxy::TransactionalMultiMapImpl::remove(
+                    to_data(key),
+                    to_data(value)
+                );
+            },
+            key,
+            value
+        );
     }
 
     /**
@@ -75,8 +99,16 @@ public:
     template<typename K, typename V>
     boost::future<std::vector<V>> remove(const K& key)
     {
-        return to_object_vector<V>(
-          proxy::TransactionalMultiMapImpl::remove_data(to_data(key)));
+        return controlled_serialization(
+            [this](const K& key){
+                return to_object_vector<V>(
+                    proxy::TransactionalMultiMapImpl::remove_data(
+                        to_data(key)
+                    )
+                );
+            },
+            key
+        );
     }
 
     /**
@@ -87,7 +119,14 @@ public:
     template<typename K>
     boost::future<int> value_count(const K& key)
     {
-        return proxy::TransactionalMultiMapImpl::value_count(to_data(key));
+        return controlled_serialization(
+            [this](const K& key){
+                return proxy::TransactionalMultiMapImpl::value_count(
+                    to_data(key)
+                );
+            },
+            key
+        );
     }
 
 private:

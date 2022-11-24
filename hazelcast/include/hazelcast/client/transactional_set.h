@@ -35,7 +35,12 @@ public:
     template<typename E>
     boost::future<bool> add(const E& e)
     {
-        return proxy::TransactionalSetImpl::add_data(to_data(e));
+        return controlled_serialization(
+            [this](const E& e){
+                return proxy::TransactionalSetImpl::add_data(to_data(e));
+            },
+            e
+        );
     }
 
     /**
@@ -46,7 +51,12 @@ public:
     template<typename E>
     boost::future<bool> remove(const E& e)
     {
-        return proxy::TransactionalSetImpl::remove_data(to_data(e));
+        return controlled_serialization(
+            [this](const E& e){
+                return proxy::TransactionalSetImpl::remove_data(to_data(e));
+            },
+            e
+        );
     }
 
 private:

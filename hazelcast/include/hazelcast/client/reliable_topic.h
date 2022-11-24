@@ -69,9 +69,17 @@ public:
     template<typename E>
     boost::future<void> publish(const E& message)
     {
-        topic::impl::reliable::ReliableTopicMessage reliable_message(
-          to_data(message), nullptr);
-        return to_void_future(ringbuffer_.get()->add(reliable_message));
+        return controlled_serialization(
+            [this](const E& message){
+                topic::impl::reliable::ReliableTopicMessage reliable_message(
+                    to_data(message),
+                    nullptr
+                );
+
+                return to_void_future(ringbuffer_.get()->add(reliable_message));
+            },
+            message
+        );
     }
 
     /**

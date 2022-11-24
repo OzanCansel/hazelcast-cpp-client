@@ -70,7 +70,12 @@ public:
     template<typename E>
     boost::future<bool> contains(const E& element)
     {
-        return proxy::IListImpl::contains(to_data(element));
+        return controlled_serialization(
+            [this](const E& element){
+                return proxy::IListImpl::contains(to_data(element));
+            },
+            element
+        );
     }
 
     /**
@@ -91,7 +96,12 @@ public:
     template<typename E>
     boost::future<bool> add(const E& element)
     {
-        return proxy::IListImpl::add(to_data(element));
+        return controlled_serialization(
+            [this](const E& element){
+                return proxy::IListImpl::add(to_data(element));
+            },
+            element
+        );
     }
 
     /**
@@ -102,7 +112,12 @@ public:
     template<typename E>
     boost::future<bool> remove(const E& element)
     {
-        return proxy::IListImpl::remove(to_data(element));
+        return controlled_serialization(
+            [this](const E& element){
+                return proxy::IListImpl::remove(to_data(element));
+            },
+            element
+        );
     }
 
     /**
@@ -202,8 +217,18 @@ public:
     template<typename E, typename R = E>
     boost::future<boost::optional<R>> set(int32_t index, const E& element)
     {
-        return to_object<R>(
-          proxy::IListImpl::set_data(index, to_data(element)));
+        return controlled_serialization(
+            [this](int32_t index, const E& element){
+                return to_object<R>(
+                    proxy::IListImpl::set_data(
+                        index,
+                        to_data(element)
+                    )
+                );
+            },
+            index,
+            element
+        );
     }
 
     /**
@@ -218,7 +243,16 @@ public:
     template<typename E>
     boost::future<void> add(int32_t index, const E& element)
     {
-        return proxy::IListImpl::add(index, to_data(element));
+        return controlled_serialization(
+            [this](int32_t index, const E& element){
+                return proxy::IListImpl::add(
+                    index,
+                    to_data(element)
+                );
+            },
+            index,
+            element
+        );
     }
 
     /**
@@ -244,7 +278,14 @@ public:
     template<typename E>
     boost::future<int> index_of(const E& element)
     {
-        return proxy::IListImpl::index_of(to_data(element));
+        return controlled_serialization(
+            [this](const E& element){
+                return proxy::IListImpl::index_of(
+                    to_data(element)
+                );
+            },
+            element
+        );
     }
 
     /**
@@ -255,7 +296,14 @@ public:
     template<typename E>
     boost::future<int32_t> last_index_of(const E& element)
     {
-        return proxy::IListImpl::last_index_of(to_data(element));
+        return controlled_serialization(
+            [this](const E& element){
+                return proxy::IListImpl::last_index_of(
+                    to_data(element)
+                );
+            },
+            element
+        );
     }
 
     /**

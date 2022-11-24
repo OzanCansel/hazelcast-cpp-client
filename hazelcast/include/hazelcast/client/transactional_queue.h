@@ -49,7 +49,13 @@ public:
     template<typename E>
     boost::future<bool> offer(const E& e, std::chrono::milliseconds timeout)
     {
-        return proxy::TransactionalQueueImpl::offer(to_data(e), timeout);
+        return controlled_serialization(
+            [this](const E& e, std::chrono::milliseconds timeout){
+                return proxy::TransactionalQueueImpl::offer(to_data(e), timeout);
+            },
+            e,
+            timeout
+        );
     }
 
     /**

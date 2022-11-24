@@ -202,8 +202,17 @@ public:
     template<typename F>
     boost::future<int64_t> alter_and_get(const F& function)
     {
-        auto f = to_data(function);
-        return alter_data(f, alter_result_type::NEW_VALUE);
+        return controlled_serialization(
+            [this](const F& function){
+                auto function_data = to_data(function);
+
+                return alter_data(
+                    function_data,
+                    alter_result_type::NEW_VALUE
+                );
+            },
+            function
+        );
     }
 
     /**
@@ -217,8 +226,17 @@ public:
     template<typename F>
     boost::future<int64_t> get_and_alter(const F& function)
     {
-        auto f = to_data(function);
-        return alter_data(f, alter_result_type::OLD_VALUE);
+        return controlled_serialization(
+            [this](const F& function){
+                auto function_data = to_data(function);
+
+                return alter_data(
+                    function_data,
+                    alter_result_type::OLD_VALUE
+                );
+            },
+            function
+        );
     }
 
     /**
@@ -232,8 +250,14 @@ public:
     template<typename F, typename R>
     boost::future<boost::optional<R>> apply(const F& function)
     {
-        auto f = to_data(function);
-        return to_object<R>(apply_data(f));
+        return controlled_serialization(
+            [this](const F& function){
+                auto function_data = to_data(function);
+
+                return to_object<R>(apply_data(function_data));
+            },
+            function
+        );
     }
 
 private:
@@ -282,25 +306,47 @@ public:
     boost::future<boost::optional<typename std::remove_pointer<T>::type>> set(
       T new_value)
     {
-        return to_object<typename std::remove_pointer<T>::type>(
-          set_data(to_data<typename std::remove_pointer<T>::type>(new_value)));
+        return controlled_serialization(
+            [this](const T& new_value){
+                return to_object<typename std::remove_pointer<T>::type>(
+                    set_data(
+                        to_data<typename std::remove_pointer<T>::type>(new_value)
+                    )
+                );
+            },
+            new_value
+        );
     }
 
     template<typename T>
     boost::future<boost::optional<typename std::remove_pointer<T>::type>>
     get_and_set(T new_value)
     {
-        return to_object<typename std::remove_pointer<T>::type>(
-          get_and_set_data(
-            to_data<typename std::remove_pointer<T>::type>(new_value)));
+        return controlled_serialization(
+            [this](const T& new_value){
+                return to_object<typename std::remove_pointer<T>::type>(
+                    get_and_set_data(
+                        to_data<typename std::remove_pointer<T>::type>(new_value)
+                    )
+                );
+            },
+            new_value
+        );
     }
 
     template<typename T, typename V>
     boost::future<bool> compare_and_set(T expect, V update)
     {
-        return compare_and_set_data(
-          to_data<typename std::remove_pointer<T>::type>(expect),
-          to_data<typename std::remove_pointer<V>::type>(update));
+        return controlled_serialization(
+            [this](const T& expect, const V& update){
+                return compare_and_set_data(
+                    to_data<typename std::remove_pointer<T>::type>(expect),
+                    to_data<typename std::remove_pointer<V>::type>(update)
+                );
+            },
+            expect,
+            update
+        );
     }
 
     boost::future<bool> is_null();
@@ -310,36 +356,68 @@ public:
     template<typename T>
     boost::future<bool> contains(T value)
     {
-        return contains_data(
-          to_data<typename std::remove_pointer<T>::type>(value));
+        return controlled_serialization(
+            [this](const T& value){
+                return contains_data(
+                    to_data<typename std::remove_pointer<T>::type>(value)
+                );
+            },
+            value
+        );
     }
 
     template<typename F>
     boost::future<void> alter(const F& function)
     {
-        return alter_data(to_data(function));
+        return controlled_serialization(
+            [this](const F& function){
+                return alter_data(to_data(function));
+            },
+            function
+        );
     }
 
     template<typename T, typename F>
     boost::future<boost::optional<typename std::remove_pointer<T>::type>>
     alter_and_get(const F& function)
     {
-        return to_object<typename std::remove_pointer<T>::type>(
-          alter_and_get_data(to_data(function)));
+        return controlled_serialization(
+            [this](const F& function){
+                return to_object<typename std::remove_pointer<T>::type>(
+                    alter_and_get_data(
+                        to_data(function)
+                    )
+                );
+            },
+            function
+        );
     }
 
     template<typename T, typename F>
     boost::future<boost::optional<typename std::remove_pointer<T>::type>>
     get_and_alter(const F& function)
     {
-        return to_object<typename std::remove_pointer<T>::type>(
-          get_and_alter_data(to_data(function)));
+        return controlled_serialization(
+            [this](const F& function){
+                return to_object<typename std::remove_pointer<T>::type>(
+                    get_and_alter_data(
+                        to_data(function)
+                    )
+                );
+            },
+            function
+        );
     }
 
     template<typename R, typename F>
     boost::future<boost::optional<R>> apply(const F& function)
     {
-        return to_object<R>(apply_data(to_data(function)));
+        return controlled_serialization(
+            [this](const F& function){
+                return to_object<R>(apply_data(to_data(function)));
+            },
+            function
+        );
     }
 
 private:

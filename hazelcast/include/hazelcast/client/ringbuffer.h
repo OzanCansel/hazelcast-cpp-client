@@ -92,7 +92,12 @@ public:
     template<typename E>
     boost::future<int64_t> add(const E& item)
     {
-        return add_data(to_data(item));
+        return controlled_serialization(
+            [this](const E& item){
+                return add_data(to_data(item));
+            },
+            item
+        );
     }
 
     /**
@@ -173,7 +178,13 @@ public:
     boost::future<int64_t> add(const E& item,
                                rb::overflow_policy overflow_policy)
     {
-        return addData(to_data(item), overflow_policy);
+        return controlled_serialization(
+            [this](const E& item, rb::overflow_policy policy){
+                return addData(to_data(item), policy);
+            },
+            item,
+            overflow_policy
+        );
     }
 
     /**
@@ -247,13 +258,23 @@ public:
       int32_t max_count,
       const IFUNCTION* filter = nullptr)
     {
-        auto filter_data = to_data<IFUNCTION>(filter);
-        return read_many_data(
-                 start_sequence, min_count, max_count, &filter_data)
-          .then(boost::launch::sync,
-                [=](boost::future<protocol::ClientMessage> f) {
-                    return get_result_set(std::move(f));
-                });
+        return controlled_serialization(
+            [this](int64_t start_sequence, int32_t min_count, int32_t max_count, const IFUNCTION* filter){
+                auto filter_data = to_data<IFUNCTION>(filter);
+                return read_many_data(
+                    start_sequence, min_count, max_count, &filter_data
+                ).then(
+                    boost::launch::sync,
+                    [=](boost::future<protocol::ClientMessage> f) {
+                        return get_result_set(std::move(f));
+                    }
+                );
+            },
+            start_sequence,
+            min_count,
+            max_count,
+            filter
+        );
     }
 
     rb::read_result_set get_result_set(boost::future<protocol::ClientMessage> f)

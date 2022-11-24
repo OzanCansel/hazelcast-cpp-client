@@ -68,7 +68,17 @@ public:
                                           const V& value,
                                           std::chrono::milliseconds ttl)
     {
-        return to_object<R>(put_data(to_data(key), to_data(value), ttl));
+        return controlled_serialization(
+            [this](const K& key, const V& value, std::chrono::milliseconds ttl){
+                return to_object<R>(
+                    put_data(to_data(key),
+                    to_data(value), ttl)
+                );
+            },
+            key,
+            value,
+            ttl
+        );
     }
 
     /**
@@ -124,16 +134,26 @@ public:
                             boost::future<boost::uuids::uuid>>::type
     add_entry_listener(entry_listener&& listener, const K& key)
     {
-        return proxy::ReplicatedMapImpl::add_entry_listener_to_key(
-          std::shared_ptr<impl::BaseEventHandler>(
-            new EntryEventHandler<
-              protocol::codec::replicatedmap_addentrylistenertokey_handler>(
-              get_name(),
-              get_context().get_client_cluster_service(),
-              get_context().get_serialization_service(),
-              std::move(listener),
-              get_context().get_logger())),
-          to_data(key));
+        return controlled_serialization(
+            [this](const entry_listener& listener, const K& key){
+                return proxy::ReplicatedMapImpl::add_entry_listener_to_key(
+                    std::shared_ptr<impl::BaseEventHandler>(
+                        new EntryEventHandler<
+                              protocol::codec::replicatedmap_addentrylistenertokey_handler
+                            >(
+                            get_name(),
+                            get_context().get_client_cluster_service(),
+                            get_context().get_serialization_service(),
+                            entry_listener{listener},
+                            get_context().get_logger()
+                        )
+                    ),
+                    to_data(key)
+                );
+            },
+            listener,
+            key
+        );
     }
 
     /**
@@ -149,17 +169,26 @@ public:
                             boost::future<boost::uuids::uuid>>::type
     add_entry_listener(entry_listener&& listener, const P& predicate)
     {
-        return proxy::ReplicatedMapImpl::add_entry_listener(
-          std::shared_ptr<impl::BaseEventHandler>(
-            new EntryEventHandler<
-              protocol::codec::
-                replicatedmap_addentrylistenerwithpredicate_handler>(
-              get_name(),
-              get_context().get_client_cluster_service(),
-              get_context().get_serialization_service(),
-              std::move(listener),
-              get_context().get_logger())),
-          to_data(predicate));
+        return controlled_serialization(
+            [this](entry_listener listener, const P& predicate){
+                return proxy::ReplicatedMapImpl::add_entry_listener(
+                    std::shared_ptr<impl::BaseEventHandler>(
+                        new EntryEventHandler<
+                              protocol::codec::replicatedmap_addentrylistenerwithpredicate_handler
+                            >(
+                            get_name(),
+                            get_context().get_client_cluster_service(),
+                            get_context().get_serialization_service(),
+                            std::move(listener),
+                            get_context().get_logger()
+                        )
+                    ),
+                    to_data(predicate)
+                );
+            },
+            listener,
+            predicate
+        );
     }
 
     /**
@@ -178,18 +207,28 @@ public:
                        const P& predicate,
                        const K& key)
     {
-        return proxy::ReplicatedMapImpl::add_entry_listener(
-          std::shared_ptr<impl::BaseEventHandler>(
-            new EntryEventHandler<
-              protocol::codec::
-                replicatedmap_addentrylistenertokeywithpredicate_handler>(
-              get_name(),
-              get_context().get_client_cluster_service(),
-              get_context().get_serialization_service(),
-              std::move(listener),
-              get_context().get_logger())),
-          to_data(key),
-          to_data(predicate));
+        return controlled_serialization(
+            [this](entry_listener listener, const P& predicate, const K& key){
+                return proxy::ReplicatedMapImpl::add_entry_listener(
+                    std::shared_ptr<impl::BaseEventHandler>(
+                        new EntryEventHandler<
+                              protocol::codec::replicatedmap_addentrylistenertokeywithpredicate_handler
+                            >(
+                            get_name(),
+                            get_context().get_client_cluster_service(),
+                            get_context().get_serialization_service(),
+                            std::move(listener),
+                            get_context().get_logger()
+                        )
+                    ),
+                    to_data(key),
+                    to_data(predicate)
+                );
+            },
+            listener,
+            predicate,
+            key
+        );
     }
 
     /**
@@ -254,7 +293,12 @@ public:
     template<typename K>
     boost::future<bool> contains_key(const K& key)
     {
-        return contains_key_data(to_data(key));
+        return controlled_serialization(
+            [this](const K& key){
+                return contains_key_data(to_data(key));
+            },
+            key
+        );
     }
 
     /**
@@ -265,7 +309,12 @@ public:
     template<typename V>
     boost::future<bool> contains_value(const V& value)
     {
-        return contains_value_data(to_data(value));
+        return controlled_serialization(
+            [this](const V& value){
+                return contains_value_data(to_data(value));
+            },
+            value
+        );
     }
 
     /**
@@ -276,7 +325,12 @@ public:
     template<typename K, typename V>
     boost::future<boost::optional<V>> get(const K& key)
     {
-        return to_object<V>(get_data(to_data(key)));
+        return controlled_serialization(
+            [this](const K& key){
+                return to_object<V>(get_data(to_data(key)));
+            },
+            key
+        );
     }
 
     /**
@@ -300,7 +354,12 @@ public:
     template<typename K, typename V>
     boost::future<boost::optional<V>> remove(const K& key)
     {
-        return to_object<V>(remove_data(to_data(key)));
+        return controlled_serialization(
+            [this](const K& key){
+                return to_object<V>(remove_data(to_data(key)));
+            },
+            key
+        );
     }
 
 private:

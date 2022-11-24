@@ -85,7 +85,12 @@ public:
     template<typename E>
     boost::future<void> put(const E& element)
     {
-        return proxy::IQueueImpl::put(to_data(element));
+        return controlled_serialization(
+            [this](const E& element){
+                return proxy::IQueueImpl::put(to_data(element));
+            },
+            element
+        );
     }
 
     /**
@@ -101,7 +106,13 @@ public:
     boost::future<bool> offer(const E& element,
                               std::chrono::milliseconds timeout)
     {
-        return proxy::IQueueImpl::offer(to_data(element), timeout);
+        return controlled_serialization(
+            [this](const E& element, std::chrono::milliseconds timeout){
+                return proxy::IQueueImpl::offer(to_data(element), timeout);
+            },
+            element,
+            timeout
+        );
     }
 
     /**
@@ -135,7 +146,14 @@ public:
     template<typename E>
     boost::future<bool> remove(const E& element)
     {
-        return proxy::IQueueImpl::remove(to_data(element));
+        return controlled_serialization(
+            [this](const E& element){
+                return proxy::IQueueImpl::remove(
+                    to_data(element)
+                );
+            },
+            element
+        );
     }
 
     /**
@@ -146,7 +164,14 @@ public:
     template<typename E>
     boost::future<bool> contains(const E& element)
     {
-        return proxy::IQueueImpl::contains(to_data(element));
+        return controlled_serialization(
+            [this](const E& element){
+                return proxy::IQueueImpl::contains(
+                    to_data(element)
+                );
+            },
+            element
+        );
     }
 
     /**

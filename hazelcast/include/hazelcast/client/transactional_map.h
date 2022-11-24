@@ -37,7 +37,12 @@ public:
     template<typename K>
     boost::future<bool> contains_key(const K& key)
     {
-        return contains_key_data(to_data(key));
+        return controlled_serialization(
+            [this](const K& key){
+                return contains_key_data(to_data(key));
+            },
+            key
+        );
     }
 
     /**
@@ -48,7 +53,12 @@ public:
     template<typename K, typename V>
     boost::future<boost::optional<V>> get(const K& key)
     {
-        return to_object<V>(get_data(to_data(key)));
+        return controlled_serialization(
+            [this](const K& key){
+                return to_object<V>(get_data(to_data(key)));
+            },
+            key
+        );
     }
 
     /**
@@ -62,7 +72,16 @@ public:
     template<typename K, typename V, typename R = V>
     boost::future<boost::optional<R>> put(const K& key, const V& value)
     {
-        return to_object<R>(put_data(to_data(key), to_data(value)));
+        return controlled_serialization(
+            [this](const K& key, const V& value){
+                return to_object<R>(
+                    put_data(to_data(key),
+                    to_data(value))
+                );
+            },
+            key,
+            value
+        );
     }
 
     /**
@@ -76,7 +95,13 @@ public:
     template<typename K, typename V>
     boost::future<void> set(const K& key, const V& value)
     {
-        return set_data(to_data(key), to_data(value));
+        return controlled_serialization(
+            [this](const K& key, const V& value){
+                return set_data(to_data(key), to_data(value));
+            },
+            key,
+            value
+        );
     }
 
     /**
@@ -91,7 +116,18 @@ public:
     boost::future<boost::optional<R>> put_if_absent(const K& key,
                                                     const V& value)
     {
-        return to_object<R>(put_if_absent_data(to_data(key), to_data(value)));
+        return controlled_serialization(
+            [this](const K& key, const V& value){
+                return to_object<R>(
+                    put_if_absent_data(
+                        to_data(key),
+                        to_data(value)
+                    )
+                );
+            },
+            key,
+            value
+        );
     }
 
     /**
@@ -105,7 +141,18 @@ public:
     template<typename K, typename V, typename R = V>
     boost::future<boost::optional<R>> replace(const K& key, const V& value)
     {
-        return to_object<R>(replace_data(to_data(key), to_data(value)));
+        return controlled_serialization(
+            [this](const K& key, const V& value){
+                return to_object<R>(
+                    replace_data(
+                        to_data(key),
+                        to_data(value)
+                    )
+                );
+            },
+            key,
+            value
+        );
     }
 
     /**
@@ -121,8 +168,18 @@ public:
                                 const V& old_value,
                                 const N& new_value)
     {
-        return replace_data(
-          to_data(key), to_data(old_value), to_data(new_value));
+        return controlled_serialization(
+            [this](const K& key, const V& old_value, const N& new_value){
+                return replace_data(
+                    to_data(key),
+                    to_data(old_value),
+                    to_data(new_value)
+                );
+            },
+            key,
+            old_value,
+            new_value
+        );
     }
 
     /**
@@ -136,7 +193,12 @@ public:
     template<typename K, typename V>
     boost::future<boost::optional<V>> remove(const K& key)
     {
-        return to_object<V>(remove_data(to_data(key)));
+        return controlled_serialization(
+            [this](const K& key){
+                return to_object<V>(remove_data(to_data(key)));
+            },
+            key
+        );
     }
 
     /**
@@ -150,7 +212,12 @@ public:
     template<typename K>
     boost::future<void> delete_entry(const K& key)
     {
-        return delete_entry_data(to_data(key));
+        return controlled_serialization(
+            [this](const K& key){
+                return delete_entry_data(to_data(key));
+            },
+            key
+        );
     }
 
     /**
@@ -164,7 +231,13 @@ public:
     template<typename K, typename V>
     boost::future<bool> remove(const K& key, const V& value)
     {
-        return remove_data(to_data(key), to_data(value));
+        return controlled_serialization(
+            [this](const K& key, const V& value){
+                return remove_data(to_data(key), to_data(value));
+            },
+            key,
+            value
+        );
     }
 
     /**
@@ -188,7 +261,16 @@ public:
     template<typename K, typename P>
     boost::future<std::vector<K>> key_set(const P& predicate)
     {
-        return to_object_vector<K>(key_set_data(to_data(predicate)));
+        return controlled_serialization(
+            [this](const P& predicate){
+                return to_object_vector<K>(
+                    key_set_data(
+                        to_data(predicate)
+                    )
+                );
+            },
+            predicate
+        );
     }
 
     /**
@@ -211,7 +293,16 @@ public:
     template<typename V, typename P>
     boost::future<std::vector<V>> values(const P& predicate)
     {
-        return to_object_vector<V>(values_data(to_data(predicate)));
+        return controlled_serialization(
+            [this](const P& predicate){
+                return to_object_vector<V>(
+                    values_data(
+                        to_data(predicate)
+                    )
+                );
+            },
+            predicate
+        );
     }
 
 private:

@@ -94,7 +94,14 @@ public:
     template<typename V>
     boost::future<bool> contains_value(const V& value)
     {
-        return proxy::IMapImpl::contains_value(to_data(value));
+        return controlled_serialization(
+            [this](const V& value){
+                return proxy::IMapImpl::contains_value(
+                    to_data(value)
+                );
+            },
+            value
+        );
     }
 
     /**
@@ -106,7 +113,12 @@ public:
     template<typename K, typename V>
     boost::future<boost::optional<V>> get(const K& key)
     {
-        return to_object<V>(get_internal(to_data(key)));
+        return controlled_serialization(
+            [this](const K& key){
+                return to_object<V>(get_internal(to_data(key)));
+            },
+            key
+        );
     }
 
     /**
@@ -158,7 +170,14 @@ public:
     template<typename K, typename V>
     boost::future<boost::optional<V>> remove(const K& key)
     {
-        return to_object<V>(remove_internal(to_data(key)));
+        return controlled_serialization(
+            [this](const K& key){
+                return to_object<V>(
+                    remove_internal(to_data(key))
+                );
+            },
+            key
+        );
     }
 
     /**
@@ -171,7 +190,16 @@ public:
     template<typename K, typename V>
     boost::future<bool> remove(const K& key, const V& value)
     {
-        return remove_internal(to_data(key), to_data(value));
+        return controlled_serialization(
+            [this](const K& key, const V& value){
+                return remove_internal(
+                    to_data(key),
+                    to_data(value)
+                );
+            },
+            key,
+            value
+        );
     }
 
     /**
@@ -188,7 +216,16 @@ public:
     template<typename P>
     boost::future<void> remove_all(const P& predicate)
     {
-        return to_void_future(remove_all_internal(to_data<P>(predicate)));
+        return controlled_serialization(
+            [this](const P& predicate){
+                return to_void_future(
+                    remove_all_internal(
+                        to_data<P>(predicate)
+                    )
+                );
+            },
+            predicate
+        );
     }
 
     /**
@@ -199,7 +236,16 @@ public:
     template<typename K>
     boost::future<void> delete_entry(const K& key)
     {
-        return to_void_future(delete_internal(to_data(key)));
+        return controlled_serialization(
+            [this](const K& key){
+                return to_void_future(
+                    delete_internal(
+                        to_data(key)
+                    )
+                );
+            },
+            key
+        );
     }
 
     /**
@@ -215,7 +261,13 @@ public:
     boost::future<bool> try_remove(const K& key,
                                    std::chrono::milliseconds timeout)
     {
-        return try_remove_internal(to_data(key), timeout);
+        return controlled_serialization(
+            [this](const K& key, std::chrono::milliseconds timeout){
+                return try_remove_internal(to_data(key), timeout);
+            },
+            key,
+            timeout
+        );
     }
 
     /**
@@ -235,7 +287,18 @@ public:
                                 const V& value,
                                 std::chrono::milliseconds timeout)
     {
-        return try_put_internal(to_data(key), to_data(value), timeout);
+        return controlled_serialization(
+            [this](const K& key, const V& value, std::chrono::milliseconds timeout){
+                return try_put_internal(
+                    to_data(key),
+                    to_data(value),
+                    timeout
+                );
+            },
+            key,
+            value,
+            timeout
+        );
     }
 
     /**
@@ -253,8 +316,20 @@ public:
                                       const V& value,
                                       std::chrono::milliseconds ttl)
     {
-        return to_void_future(
-          try_put_transient_internal(to_data(key), to_data(value), ttl));
+        return controlled_serialization(
+            [this](const K& key, const V& value, std::chrono::milliseconds ttl){
+                return to_void_future(
+                    try_put_transient_internal(
+                        to_data(key),
+                        to_data(value),
+                        ttl
+                    )
+                );
+            },
+            key,
+            value,
+            ttl
+        );
     }
 
     /**
@@ -288,8 +363,20 @@ public:
     boost::future<boost::optional<V>>
     put_if_absent(const K& key, const V& value, std::chrono::milliseconds ttl)
     {
-        return to_object<R>(
-          put_if_absent_internal(to_data(key), to_data(value), ttl));
+        return controlled_serialization(
+            [this](const K& key, const V& value, std::chrono::milliseconds ttl){
+                return to_object<R>(
+                    put_if_absent_internal(
+                        to_data(key),
+                        to_data(value),
+                        ttl
+                    )
+                );
+            },
+            key,
+            value,
+            ttl
+        );
     }
 
     /**
@@ -304,8 +391,18 @@ public:
                                 const V& old_value,
                                 const N& new_value)
     {
-        return replace_if_same_internal(
-          to_data(key), to_data(old_value), to_data(new_value));
+        return controlled_serialization(
+            [this](const K& key, const V& old_value, const N& new_value){
+                return replace_if_same_internal(
+                    to_data(key),
+                    to_data(old_value),
+                    to_data(new_value)
+                );
+            },
+            key,
+            old_value,
+            new_value
+        );
     }
 
     /**
@@ -318,7 +415,18 @@ public:
     template<typename K, typename V, typename R = V>
     boost::future<boost::optional<R>> replace(const K& key, const V& value)
     {
-        return to_object<R>(replace_internal(to_data(key), to_data(value)));
+        return controlled_serialization(
+            [this](const K& key, const V& value){
+                return to_object<R>(
+                    replace_internal(
+                        to_data(key),
+                        to_data(value)
+                    )
+                );
+            },
+            key,
+            value
+        );
     }
 
     /**
@@ -348,7 +456,20 @@ public:
                             const V& value,
                             std::chrono::milliseconds ttl)
     {
-        return to_void_future(set_internal(to_data(key), to_data(value), ttl));
+        return controlled_serialization(
+            [this](const K& key, const V& value, std::chrono::milliseconds ttl){
+                return to_void_future(
+                    set_internal(
+                        to_data(key),
+                        to_data(value),
+                        ttl
+                    )
+                );
+            },
+            key,
+            value,
+            ttl
+        );
     }
 
     /**
@@ -392,7 +513,18 @@ public:
     template<typename K>
     boost::future<void> lock(const K& key, std::chrono::milliseconds lease_time)
     {
-        return to_void_future(proxy::IMapImpl::lock(to_data(key), lease_time));
+        return controlled_serialization(
+            [this](const K& key, std::chrono::milliseconds lease_time){
+                return to_void_future(
+                    proxy::IMapImpl::lock(
+                        to_data(key),
+                        lease_time
+                    )
+                );
+            },
+            key,
+            lease_time
+        );
     }
 
     /**
@@ -406,7 +538,12 @@ public:
     template<typename K>
     boost::future<bool> is_locked(const K& key)
     {
-        return proxy::IMapImpl::is_locked(to_data(key));
+        return controlled_serialization(
+            [this](const K& key){
+                return proxy::IMapImpl::is_locked(to_data(key));
+            },
+            key
+        );
     }
 
     /**
@@ -444,7 +581,16 @@ public:
     boost::future<bool> try_lock(const K& key,
                                  std::chrono::milliseconds timeout)
     {
-        return proxy::IMapImpl::try_lock(to_data(key), timeout);
+        return controlled_serialization(
+            [this](const K& key, std::chrono::milliseconds timeout){
+                return proxy::IMapImpl::try_lock(
+                    to_data(key),
+                    timeout
+                );
+            },
+            key,
+            timeout
+        );
     }
 
     /**
@@ -469,7 +615,20 @@ public:
                                  std::chrono::milliseconds timeout,
                                  std::chrono::milliseconds lease_time)
     {
-        return proxy::IMapImpl::try_lock(to_data(key), timeout, lease_time);
+        using std::chrono::milliseconds;
+
+        return controlled_serialization(
+            [this](const K& key, milliseconds timeout, milliseconds lease_time){
+                return proxy::IMapImpl::try_lock(
+                    to_data(key),
+                    timeout,
+                    lease_time
+                );
+            },
+            key,
+            timeout,
+            lease_time
+        );
     }
 
     /**
@@ -489,7 +648,16 @@ public:
     template<typename K>
     boost::future<void> unlock(const K& key)
     {
-        return to_void_future(proxy::IMapImpl::unlock(to_data(key)));
+        return controlled_serialization(
+            [this](const K& key){
+                return to_void_future(
+                    proxy::IMapImpl::unlock(
+                        to_data(key)
+                    )
+                );
+            },
+            key
+        );
     }
 
     /**
@@ -503,7 +671,16 @@ public:
     template<typename K>
     boost::future<void> force_unlock(const K& key)
     {
-        return to_void_future(proxy::IMapImpl::force_unlock(to_data(key)));
+        return controlled_serialization(
+            [this](const K& key){
+                return to_void_future(
+                    proxy::IMapImpl::force_unlock(
+                        to_data(key)
+                    )
+                );
+            },
+            key
+        );
     }
 
     /**
@@ -522,7 +699,14 @@ public:
     boost::future<std::string> add_interceptor(
       const MapInterceptor& interceptor)
     {
-        return proxy::IMapImpl::add_interceptor(to_data(interceptor));
+        return controlled_serialization(
+            [this](const MapInterceptor& interceptor){
+                return proxy::IMapImpl::add_interceptor(
+                    to_data(interceptor)
+                );
+            },
+            interceptor
+        );
     }
 
     /**
@@ -582,20 +766,31 @@ public:
       const P& predicate,
       bool include_value)
     {
-        const auto listener_flags = listener.flags_;
-        return proxy::IMapImpl::add_entry_listener(
-          std::unique_ptr<impl::BaseEventHandler>(
-            new impl::EntryEventHandler<
-              protocol::codec::map_addentrylistenerwithpredicate_handler>(
-              get_name(),
-              get_context().get_client_cluster_service(),
-              get_context().get_serialization_service(),
-              std::move(listener),
-              include_value,
-              get_context().get_logger())),
-          to_data<P>(predicate),
-          include_value,
-          listener_flags);
+        return controlled_serialization(
+            [this](entry_listener listener, const P& predicate, bool include_value){
+                const auto listener_flags = listener.flags_;
+                return proxy::IMapImpl::add_entry_listener(
+                    std::unique_ptr<impl::BaseEventHandler>(
+                        new impl::EntryEventHandler<
+                            protocol::codec::map_addentrylistenerwithpredicate_handler
+                        >(
+                            get_name(),
+                            get_context().get_client_cluster_service(),
+                            get_context().get_serialization_service(),
+                            std::move(listener),
+                            include_value,
+                            get_context().get_logger()
+                        )
+                    ),
+                    to_data<P>(predicate),
+                    include_value,
+                    listener_flags
+                );
+            },
+            listener,
+            predicate,
+            include_value
+        );
     }
 
     /**
@@ -617,20 +812,32 @@ public:
       bool include_value,
       const K& key)
     {
-        const auto listener_flags = listener.flags_;
-        return proxy::IMapImpl::add_entry_listener(
-          std::shared_ptr<impl::BaseEventHandler>(
-            new impl::EntryEventHandler<
-              protocol::codec::map_addentrylistenertokey_handler>(
-              get_name(),
-              get_context().get_client_cluster_service(),
-              get_context().get_serialization_service(),
-              std::move(listener),
-              include_value,
-              get_context().get_logger())),
-          include_value,
-          to_data<K>(key),
-          listener_flags);
+        return controlled_serialization(
+            [this](entry_listener listener, bool include_value, const K& key){
+                const auto listener_flags = listener.flags_;
+
+                return proxy::IMapImpl::add_entry_listener(
+                    std::shared_ptr<impl::BaseEventHandler>(
+                        new impl::EntryEventHandler<
+                          protocol::codec::map_addentrylistenertokey_handler
+                        >(
+                            get_name(),
+                            get_context().get_client_cluster_service(),
+                            get_context().get_serialization_service(),
+                            std::move(listener),
+                            include_value,
+                            get_context().get_logger()
+                        )
+                    ),
+                    include_value,
+                    to_data<K>(key),
+                    listener_flags
+                );
+            },
+            listener,
+            include_value,
+            key
+        );
     }
 
     /**
@@ -645,8 +852,16 @@ public:
     boost::future<boost::optional<entry_view<K, V>>> get_entry_view(
       const K& key)
     {
-        auto f = proxy::IMapImpl::get_entry_view_data(to_data(key));
-        return to_object_entry_view<K, V>(std::move(f));
+        return controlled_serialization(
+            [this](const K& key){
+                return to_object_entry_view<K, V>(
+                    proxy::IMapImpl::get_entry_view_data(
+                        to_data(key)
+                    )
+                );
+            },
+            key
+        );
     }
 
     /**
@@ -662,7 +877,12 @@ public:
     template<typename K>
     boost::future<bool> evict(const K& key)
     {
-        return evict_internal(to_data(key));
+        return controlled_serialization(
+            [this](const K& key){
+                return evict_internal(to_data(key));
+            },
+            key
+        );
     }
 
     /**
@@ -675,27 +895,34 @@ public:
     boost::future<std::unordered_map<K, V>> get_all(
       const std::unordered_set<K>& keys)
     {
-        if (keys.empty()) {
-            return boost::make_ready_future(std::unordered_map<K, V>());
-        }
+        return controlled_serialization(
+            [this](const std::unordered_set<K>& keys){
+                if (keys.empty()) {
+                    return boost::make_ready_future(std::unordered_map<K, V>());
+                }
 
-        std::unordered_map<int, std::vector<serialization::pimpl::data>>
-          partition_to_key_data;
-        // group the request per server
-        for (auto& key : keys) {
-            auto key_data = to_data<K>(key);
+                std::unordered_map<int, std::vector<serialization::pimpl::data>>
+                  partition_to_key_data;
 
-            auto partitionId = get_partition_id(key_data);
-            partition_to_key_data[partitionId].push_back(std::move(key_data));
-        }
+                // group the request per server
+                for (auto& key : keys) {
+                    auto key_data = to_data<K>(key);
 
-        std::vector<boost::future<EntryVector>> futures;
-        futures.reserve(partition_to_key_data.size());
-        for (auto& entry : partition_to_key_data) {
-            futures.push_back(get_all_internal(entry.first, entry.second));
-        }
+                    auto partitionId = get_partition_id(key_data);
+                    partition_to_key_data[partitionId].push_back(std::move(key_data));
+                }
 
-        return to_object_map<K, V>(futures);
+                std::vector<boost::future<EntryVector>> futures;
+                futures.reserve(partition_to_key_data.size());
+
+                for (auto& entry : partition_to_key_data) {
+                    futures.push_back(get_all_internal(entry.first, entry.second));
+                }
+
+                return to_object_map<K, V>(futures);
+            },
+            keys
+        );
     }
 
     /**
@@ -730,8 +957,16 @@ public:
         !std::is_base_of<query::paging_predicate_marker, P>::value>::type>
     boost::future<std::vector<K>> key_set(const P& predicate)
     {
-        return to_object_vector<K>(
-          proxy::IMapImpl::key_set_data(to_data(predicate)));
+        return controlled_serialization(
+            [this](const P& predicate){
+                return to_object_vector<K>(
+                    proxy::IMapImpl::key_set_data(
+                        to_data(predicate)
+                    )
+                );
+            },
+            predicate
+        );
     }
 
     /**
@@ -787,8 +1022,16 @@ public:
         !std::is_base_of<query::paging_predicate_marker, P>::value>::type>
     boost::future<std::vector<V>> values(const P& predicate)
     {
-        return to_object_vector<V>(
-          proxy::IMapImpl::values_data(to_data(predicate)));
+        return controlled_serialization(
+            [this](const P& predicate){
+                return to_object_vector<V>(
+                    proxy::IMapImpl::values_data(
+                        to_data(predicate)
+                    )
+                );
+            },
+            predicate
+        );
     }
 
     /**
@@ -844,8 +1087,16 @@ public:
         !std::is_base_of<query::paging_predicate_marker, P>::value>::type>
     boost::future<std::vector<std::pair<K, V>>> entry_set(const P& predicate)
     {
-        return to_entry_object_vector<K, V>(
-          proxy::IMapImpl::entry_set_data(to_data(predicate)));
+        return controlled_serialization(
+            [this](const P& predicate){
+                return to_entry_object_vector<K, V>(
+                    proxy::IMapImpl::entry_set_data(
+                        to_data(predicate)
+                    )
+                );
+            },
+            predicate
+        );
     }
 
     /**
@@ -955,8 +1206,18 @@ public:
       const K& key,
       const EntryProcessor& entry_processor)
     {
-        return to_object<ResultType>(
-          execute_on_key_internal(to_data(key), to_data(entry_processor)));
+        return controlled_serialization(
+            [this](const K& key, const EntryProcessor& entry_processor){
+                return to_object<ResultType>(
+                    execute_on_key_internal(
+                        to_data(key),
+                        to_data(entry_processor)
+                    )
+                );
+            },
+            key,
+            entry_processor
+        );
     }
 
     /**
@@ -973,8 +1234,18 @@ public:
       const K& key,
       const EntryProcessor& entry_processor)
     {
-        return to_object<ResultType>(
-          submit_to_key_internal(to_data(key), to_data(entry_processor)));
+        return controlled_serialization(
+            [this](const K& key, const EntryProcessor& entry_processor){
+                return to_object<ResultType>(
+                    submit_to_key_internal(
+                        to_data(key),
+                        to_data(entry_processor)
+                    )
+                );
+            },
+            key,
+            entry_processor
+        );
     }
 
     /**
@@ -1016,8 +1287,16 @@ public:
     boost::future<std::unordered_map<K, boost::optional<ResultType>>>
     execute_on_entries(const EntryProcessor& entry_processor)
     {
-        return to_object_map<K, ResultType>(
-          proxy::IMapImpl::execute_on_entries_data(to_data(entry_processor)));
+        return controlled_serialization(
+            [this](const EntryProcessor& entry_processor){
+                return to_object_map<K, ResultType>(
+                    proxy::IMapImpl::execute_on_entries_data(
+                        to_data(entry_processor)
+                    )
+                );
+            },
+            entry_processor
+        );
     }
 
     /**
@@ -1043,9 +1322,18 @@ public:
     execute_on_entries(const EntryProcessor& entry_processor,
                        const P& predicate)
     {
-        return to_object_map<K, ResultType>(
-          proxy::IMapImpl::execute_on_entries_data(to_data(entry_processor),
-                                                   to_data(predicate)));
+        return controlled_serialization(
+            [this](const EntryProcessor& entry_processor, const P& predicate){
+                return to_object_map<K, ResultType>(
+                    proxy::IMapImpl::execute_on_entries_data(
+                        to_data(entry_processor),
+                        to_data(predicate)
+                    )
+                );
+            },
+            entry_processor,
+            predicate
+        );
     }
 
     /**
@@ -1061,28 +1349,34 @@ public:
     template<typename K, typename V>
     boost::future<void> put_all(const std::unordered_map<K, V>& entries)
     {
-        std::unordered_map<int, EntryVector> entryMap;
-        for (auto& entry : entries) {
-            serialization::pimpl::data key_data = to_data(entry.first);
-            int partitionId = get_partition_id(key_data);
-            entryMap[partitionId].push_back(
-              std::make_pair(key_data, to_data(entry.second)));
-        }
+        return controlled_serialization(
+            [this](const std::unordered_map<K,V>& entries){
+                std::unordered_map<int, EntryVector> entryMap;
+                for (auto& entry : entries) {
+                    serialization::pimpl::data key_data = to_data(entry.first);
+                    int partitionId = get_partition_id(key_data);
+                    entryMap[partitionId].push_back(
+                      std::make_pair(key_data, to_data(entry.second)));
+                }
 
-        std::vector<boost::future<protocol::ClientMessage>> resultFutures;
-        for (auto&& partitionEntry : entryMap) {
-            auto partitionId = partitionEntry.first;
-            resultFutures.push_back(
-              put_all_internal(partitionId, std::move(partitionEntry.second)));
-        }
-        return boost::when_all(resultFutures.begin(), resultFutures.end())
-          .then(boost::launch::sync,
-                [](boost::future<boost::csbl::vector<
-                     boost::future<protocol::ClientMessage>>> futures) {
-                    for (auto& f : futures.get()) {
-                        f.get();
-                    }
-                });
+                std::vector<boost::future<protocol::ClientMessage>> resultFutures;
+                for (auto&& partitionEntry : entryMap) {
+                    auto partitionId = partitionEntry.first;
+                    resultFutures.push_back(
+                        put_all_internal(partitionId, std::move(partitionEntry.second))
+                    );
+                }
+                return boost::when_all(resultFutures.begin(), resultFutures.end())
+                  .then(boost::launch::sync,
+                        [](boost::future<boost::csbl::vector<
+                            boost::future<protocol::ClientMessage>>> futures) {
+                            for (auto& f : futures.get()) {
+                                f.get();
+                            }
+                        });
+            },
+            entries
+        );
     }
 
     /**
@@ -1280,15 +1574,21 @@ protected:
       const std::unordered_set<K>& keys,
       const EntryProcessor& entry_processor)
     {
-        if (keys.empty()) {
-            return boost::make_ready_future(EntryVector());
-        }
-        std::vector<serialization::pimpl::data> keysData;
-        for (const auto& k : keys) {
-            keysData.push_back(to_data<K>(k));
-        }
-        return proxy::IMapImpl::execute_on_keys_data(
-          keysData, to_data<EntryProcessor>(entry_processor));
+        return controlled_serialization(
+            [this](const std::unordered_set<K>& keys, const EntryProcessor& entry_processor){
+                if (keys.empty()) {
+                    return boost::make_ready_future(EntryVector());
+                }
+                std::vector<serialization::pimpl::data> keysData;
+                for (const auto& k : keys) {
+                    keysData.push_back(to_data<K>(k));
+                }
+                return proxy::IMapImpl::execute_on_keys_data(
+                  keysData, to_data<EntryProcessor>(entry_processor));
+            },
+            keys,
+            entry_processor
+        );
     }
 
     virtual boost::future<protocol::ClientMessage> put_all_internal(
