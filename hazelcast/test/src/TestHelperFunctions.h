@@ -19,10 +19,10 @@
 #include "hazelcast/client/spi/ClientContext.h"
 
 inline
-hazelcast::client::spi::ClientContext&
-null_context()
+hazelcast::client::serialization::pimpl::default_schema_service&
+null_schema_service()
 {
-    return *static_cast<hazelcast::client::spi::ClientContext*>(nullptr);
+    return *static_cast<hazelcast::client::serialization::pimpl::default_schema_service*>(nullptr);
 }
 
 #define ASSERT_EQ_EVENTUALLY_WITH_TIMEOUT_MSG(                                 \

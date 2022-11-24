@@ -1808,7 +1808,7 @@ namespace pimpl {
 class HAZELCAST_API SerializationService : public util::Disposable
 {
 public:
-    SerializationService(const serialization_config& config, spi::ClientContext&);
+    SerializationService(const serialization_config& config, default_schema_service&);
 
     PortableSerializer& get_portable_serializer();
 

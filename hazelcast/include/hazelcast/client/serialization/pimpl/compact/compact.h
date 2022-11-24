@@ -25,6 +25,7 @@
 #include "hazelcast/client/serialization/serialization.h"
 #include "hazelcast/util/SynchronizedMap.h"
 #include "hazelcast/client/serialization/field_kind.h"
+#include "hazelcast/client/serialization/pimpl/compact/default_schema_service.h"
 
 #if defined(WIN32) || defined(_WIN32) || defined(WIN64) || defined(_WIN64)
 #pragma warning(push)
@@ -1378,54 +1379,11 @@ private:
     std::string type_name;
 };
 
-/**
- * Service to put and get metadata to cluster.
- */
-class HAZELCAST_API default_schema_service
-{
-public:
-
-    static constexpr const char* SERVICE_NAME = "schema-service";
-    /**
-     * Maximum number of attempts for schema replication process.
-    */
-    static constexpr const char* MAX_PUT_RETRY_COUNT =
-      "hazelcast.client.schema.max.put.retry.count";
-    static constexpr const char* MAX_PUT_RETRY_COUNT_DEFAULT = "100";
-
-    default_schema_service(spi::ClientContext&);
-
-    /**
-     * Gets the schema with the given id either by
-     * <ul>
-     *     <li>returning it directly from the local registry, if it exists.</li>
-     *     <li>searching the cluster.</li>
-     * </ul>
-     */
-    schema get(int64_t schemaId);
-
-    /**
-     * Replicates schema on the cluster
-    */
-    boost::future<void> replicate_schema(schema);
-
-    void check_schema_replicated(const schema&);
-
-private:
-
-    boost::future<void> replicate_schema_attempt(schema, int attempts = 0);
-
-    int retry_pause_millis_;
-    int max_put_retry_count_;
-    spi::ClientContext& context_;
-    util::SynchronizedMap<int64_t, schema> schemas;
-};
-
 class HAZELCAST_API compact_stream_serializer
 {
 public:
 
-    compact_stream_serializer(spi::ClientContext&);
+    compact_stream_serializer(default_schema_service&);
 
     template<typename T>
     T read(object_data_input& in);
@@ -1437,7 +1395,7 @@ public:
 
 private:
 
-    default_schema_service schema_service;
+    default_schema_service& schema_service;
 };
 
 struct HAZELCAST_API field_kind_based_operations
