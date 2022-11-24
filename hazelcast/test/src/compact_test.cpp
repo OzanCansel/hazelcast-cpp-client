@@ -650,7 +650,7 @@ public:
 TEST_F(CompactSerializationTest, testAllTypes)
 {
     serialization_config config;
-    SerializationService ss(config, null_context());
+    SerializationService ss(config, null_schema_service());
 
     auto expected = create_main_dto();
     auto actual = to_data_and_back_to_object(ss, expected);
@@ -660,7 +660,7 @@ TEST_F(CompactSerializationTest, testAllTypes)
 TEST_F(CompactSerializationTest, testRecursive)
 {
     serialization_config config;
-    SerializationService ss(config, null_context());
+    SerializationService ss(config, null_schema_service());
 
     auto n2 = std::make_shared<node_dto>(node_dto{ 2, nullptr });
     auto n1 = std::make_shared<node_dto>(node_dto{ 1, n2 });
@@ -672,7 +672,7 @@ TEST_F(CompactSerializationTest, testRecursive)
 TEST_F(CompactSerializationTest, testBits)
 {
     serialization_config config;
-    SerializationService ss(config, null_context());
+    SerializationService ss(config, null_schema_service());
 
     bits_dto expected;
     expected.a = true;
@@ -925,7 +925,7 @@ TEST_F(CompactNullablePrimitiveInteroperabilityTest,
         boost::make_optional(std::vector<double>{ 41231.32, 2 })
     };
     serialization_config config;
-    SerializationService ss(config, null_context());
+    SerializationService ss(config, null_schema_service());
 
     const data& data = ss.to_data(expected);
     auto actual = ss.to_object<nullable_primitive_object>(data).value();
@@ -985,7 +985,7 @@ TEST_F(CompactNullablePrimitiveInteroperabilityTest,
             boost::make_optional<double>(2) })
     };
     serialization_config config;
-    SerializationService ss(config, null_context());
+    SerializationService ss(config, null_schema_service());
 
     const data& data = ss.to_data(expected);
     auto actual = ss.to_object<primitive_object>(data).value();
@@ -1010,7 +1010,7 @@ TEST_F(CompactNullablePrimitiveInteroperabilityTest,
 {
     nullable_primitive_object expected;
     serialization_config config;
-    SerializationService ss(config, null_context());
+    SerializationService ss(config, null_schema_service());
 
     const data& data = ss.to_data(expected);
     ASSERT_THROW(ss.to_object<primitive_object>(data),

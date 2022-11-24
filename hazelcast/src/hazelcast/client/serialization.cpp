@@ -970,11 +970,11 @@ PortableContext::get_serialization_config() const
     return serialization_config_;
 }
 
-SerializationService::SerializationService(const serialization_config& config, spi::ClientContext& context)
+SerializationService::SerializationService(const serialization_config& config, default_schema_service& schema_service)
   : serialization_config_(config)
   , portable_context_(serialization_config_)
   , portable_serializer_(portable_context_)
-  , compact_serializer_(context)
+  , compact_serializer_(schema_service)
 {}
 
 DefaultPortableWriter::DefaultPortableWriter(
