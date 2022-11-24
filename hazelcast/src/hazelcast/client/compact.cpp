@@ -1812,15 +1812,15 @@ schema_writer::build() &&
 }
 
 default_schema_service::default_schema_service(spi::ClientContext& context)
-    :   context_{context}
+    :   context_ {context}
     ,   max_put_retry_count_ {
-            context.get_client_properties().get_integer(
+            context_.get_client_properties().get_integer(
                 client_property { MAX_PUT_RETRY_COUNT, MAX_PUT_RETRY_COUNT_DEFAULT }
             )
         }
     ,   retry_pause_millis_ {
-            context.get_client_properties().get_integer(
-                context.get_client_properties().get_invocation_retry_pause_millis()
+            context_.get_client_properties().get_integer(
+                context_.get_client_properties().get_invocation_retry_pause_millis()
             )
         }
 {}
@@ -1943,8 +1943,8 @@ void default_schema_service::check_schema_replicated(const schema& s)
     }
 }
 
-compact_stream_serializer::compact_stream_serializer(spi::ClientContext& context)
-    :   schema_service{context}
+compact_stream_serializer::compact_stream_serializer(default_schema_service& service)
+    :   schema_service{service}
 {}
 
 boost::future<void>
