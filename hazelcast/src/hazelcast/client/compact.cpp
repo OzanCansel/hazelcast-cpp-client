@@ -1141,13 +1141,13 @@ create_compact_writer(pimpl::schema_writer* schema_writer)
 }
 
 default_compact_writer::default_compact_writer(
-    compact_stream_serializer& compact_stream_serializer,
-    object_data_output& object_data_output,
-    const schema& schema)
-    : compact_stream_serializer_(compact_stream_serializer)
-    , object_data_output_(object_data_output)
-    , schema_(schema)
-    , field_offsets(schema.number_of_var_size_fields())
+  compact_stream_serializer& compact_stream_serializer,
+  object_data_output& object_data_output,
+  const schema& schema)
+  : compact_stream_serializer_(compact_stream_serializer)
+  , object_data_output_(object_data_output)
+  , schema_(schema)
+  , field_offsets(schema.number_of_var_size_fields())
 {
     if (schema.number_of_var_size_fields() != 0) {
         data_start_position =
