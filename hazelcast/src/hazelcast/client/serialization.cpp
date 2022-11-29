@@ -1186,10 +1186,10 @@ data::data()
   : cached_hash_value_(-1)
 {}
 
-data::data(std::vector<byte> buffer, boost::optional<std::vector<serialization::pimpl::schema>> s)
+data::data(std::vector<byte> buffer, schemas_t s)
   : data_(std::move(buffer))
   , cached_hash_value_(-1)
-  , schemas_{std::move(s)}
+  , schemas_will_be_replicated_{move(s)}
 {
     size_t size = data_.size();
     if (size > 0 && size < data::DATA_OVERHEAD) {
@@ -1247,6 +1247,12 @@ data::get_type() const
     return boost::endian::
       endian_load<boost::uint32_t, 4, boost::endian::order::big>(
         &data_[data::TYPE_OFFSET]);
+}
+
+const data::schemas_t&
+data::schemas_will_be_replicated() const
+{
+    return schemas_will_be_replicated_;
 }
 
 int
