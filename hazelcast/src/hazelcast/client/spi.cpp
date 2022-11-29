@@ -1402,13 +1402,13 @@ ClientInvocation::invoke()
         });
     };
 
-    auto schemas = (*(client_message_.load()))->schemas_;
+    const auto& schemas = (*(client_message_.load()))->schemas_will_be_replicated();
 
-    if (schemas.has_value())
+    if (!schemas.empty())
     {
         auto self = shared_from_this();
 
-        return replicate_schemas(*schemas).then(
+        return replicate_schemas(schemas).then(
             boost::launch::sync,
             [this, fn, self](boost::future<std::vector<boost::future<void>>> replications){
                 for (auto& replication : replications.get())
@@ -1445,12 +1445,12 @@ ClientInvocation::invoke_urgent()
         });
     };
 
-    auto schemas = (*(client_message_.load()))->schemas_;
+    const auto& schemas = (*(client_message_.load()))->schemas_will_be_replicated();
 
-    if (schemas.has_value()){
+    if (!schemas.empty()){
         auto self = shared_from_this();
 
-        return replicate_schemas(*schemas).then(
+        return replicate_schemas(schemas).then(
             [this, fn, self](boost::future<std::vector<boost::future<void>>> replications){
                 for (auto& replication : replications.get())
                     replication.get();
