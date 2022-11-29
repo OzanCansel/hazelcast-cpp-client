@@ -606,14 +606,8 @@ void inline compact_stream_serializer::write(const T& object,
 {
     const auto& schema_v = schema_of<T>::schema_v;
 
-    if (!schema_service.is_schema_replicated(schema_v))
-    {
-        if(!out.schemas_.has_value())
-        {
-            out.schemas_ = std::vector<schema>{};
-
-            out.schemas_->push_back(schema_v);
-        }
+    if (!schema_service.is_schema_replicated(schema_v)) {
+        out.schemas_will_be_replicated_.push_back(schema_v);
     }
 
     out.write<int64_t>(schema_v.schema_id());
