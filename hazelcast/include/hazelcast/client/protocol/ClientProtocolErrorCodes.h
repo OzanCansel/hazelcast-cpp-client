@@ -120,8 +120,7 @@ enum client_protocol_error_codes
     UNEXPECTED_MESSAGE_TYPE = -1,
     HAZELCAST_CLIENT_OFFLINE = -2,
     UNKNOWN_HOST = -3,
-    CLIENT_NOT_ALLOWED_IN_CLUSTER = -4,
-    SCHEMA_NOT_REPLICATED = -5
+    CLIENT_NOT_ALLOWED_IN_CLUSTER = -4
 };
 }
 } // namespace client

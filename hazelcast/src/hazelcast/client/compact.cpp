@@ -1814,13 +1814,13 @@ schema_writer::build() &&
 default_schema_service::default_schema_service(spi::ClientContext& context)
     :   context_ {context}
     ,   max_put_retry_count_ {
-            context_.get_client_properties().get_integer(
+            context.get_client_properties().get_integer(
                 client_property { MAX_PUT_RETRY_COUNT, MAX_PUT_RETRY_COUNT_DEFAULT }
             )
         }
     ,   retry_pause_millis_ {
-            context_.get_client_properties().get_integer(
-                context_.get_client_properties().get_invocation_retry_pause_millis()
+            context.get_client_properties().get_integer(
+                context.get_client_properties().get_invocation_retry_pause_millis()
             )
         }
 {}
@@ -1933,14 +1933,9 @@ default_schema_service::replicate_schema_attempt(schema s, int attempts)
                 );
 }
 
-void default_schema_service::check_schema_replicated(const schema& s)
+bool default_schema_service::is_schema_replicated(const schema& s)
 {
-    const std::shared_ptr<pimpl::schema>& ptr = schemas.get(s.schema_id());
-
-    if (!ptr) {
-        throw exception::schema_not_replicated(
-          "schema service", "schema not replicated to the cluster", s);
-    }
+    return bool(schemas.get(s.schema_id()));
 }
 
 compact_stream_serializer::compact_stream_serializer(default_schema_service& service)

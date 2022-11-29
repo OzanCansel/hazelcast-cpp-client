@@ -93,31 +93,6 @@ protected:
         return to_data<T>(&object);
     }
 
-    template<typename Fn, typename... Params>
-    decltype(std::declval<Fn>()(std::declval<Params>()...)) controlled_serialization(Fn fn, const Params&... params)
-    {
-        using boost::future;
-        using boost::launch;
-        using serialization::pimpl::data;
-
-        try
-        {
-            return fn(params...);
-        }
-        catch(exception::schema_not_replicated& e)
-        {
-            return serialization_service_.get_compact_serializer()
-              .replicate_schema(e.schema())
-              .then(boost::launch::sync,
-                    [=](boost::future<void> f) {
-                        f.get();
-
-                        return controlled_serialization(std::move(fn), params...);
-                    })
-              .unwrap();
-        }
-    }
-
     template<typename K, typename V>
     inline boost::future<std::unordered_map<K, V>> to_object_map(
       std::vector<boost::future<EntryVector>>& futures)

@@ -27,6 +27,7 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <iterator>
 
 #include <boost/endian/arithmetic.hpp>
 #include <boost/endian/conversion.hpp>
@@ -1209,6 +1210,18 @@ public:
         header->flags = is_final ? IS_FINAL_FLAG : DEFAULT_FLAGS;
         std::memcpy(
           fp + SIZE_OF_FRAME_LENGTH_AND_FLAGS, &bytes[0], bytes.size());
+
+        if (value.schemas_.has_value()) {
+            if (!schemas_.has_value()) {
+                schemas_ = std::vector<serialization::pimpl::schema>{};
+            }
+
+            schemas_->insert(
+                end(*schemas_),
+                make_move_iterator(begin(*value.schemas_)),
+                make_move_iterator(end(*value.schemas_))
+            );
+        }
     }
 
     inline void set(const serialization::pimpl::data* value,
@@ -1484,6 +1497,8 @@ private:
     std::vector<std::vector<byte>> data_buffer_;
     size_t buffer_index_{ 0 };
     size_t offset_{ 0 };
+public:
+    boost::optional<std::vector<serialization::pimpl::schema>> schemas_;
 };
 
 template<>

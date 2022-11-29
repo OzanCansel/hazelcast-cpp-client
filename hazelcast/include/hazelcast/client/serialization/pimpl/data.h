@@ -22,6 +22,7 @@
 #include <stdint.h>
 
 #include "hazelcast/util/export.h"
+#include "hazelcast/client/serialization/pimpl/compact/schema.h"
 
 #if defined(WIN32) || defined(_WIN32) || defined(WIN64) || defined(_WIN64)
 #pragma warning(push)
@@ -46,7 +47,7 @@ public:
 
     data();
 
-    data(std::vector<byte> buffer);
+    data(std::vector<byte> buffer, boost::optional<std::vector<serialization::pimpl::schema>> = boost::none);
 
     size_t data_size() const;
 
@@ -69,6 +70,8 @@ public:
     bool operator<(const data& rhs) const;
 
     friend bool HAZELCAST_API operator==(const data& lhs, const data& rhs);
+
+    boost::optional<std::vector<serialization::pimpl::schema>> schemas_;
 
 private:
     std::vector<byte> data_;

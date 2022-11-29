@@ -56,7 +56,7 @@ public:
     */
     boost::future<void> replicate_schema(schema);
 
-    void check_schema_replicated(const schema&);
+    bool is_schema_replicated(const schema&);
 
 private:
 
