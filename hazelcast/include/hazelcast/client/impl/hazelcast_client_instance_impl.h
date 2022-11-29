@@ -226,7 +226,6 @@ private:
     client_config client_config_;
     client_properties client_properties_;
     spi::ClientContext client_context_;
-
     serialization::pimpl::default_schema_service schema_service_;
     serialization::pimpl::SerializationService serialization_service_;
     std::shared_ptr<connection::ClientConnectionManagerImpl>

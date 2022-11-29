@@ -923,7 +923,12 @@ public:
         }
     }
 
+    boost::optional<std::vector<pimpl::schema>> schemas_;
+
 private:
+
+    friend class pimpl::compact_stream_serializer;
+
     pimpl::PortableSerializer* portable_serializer_;
     pimpl::compact_stream_serializer* compact_serializer_;
     std::shared_ptr<serialization::global_serializer> global_serializer_;
@@ -1830,7 +1835,7 @@ public:
 
         output.write_object<T>(object);
 
-        return { std::move(output).to_byte_array() };
+        return { std::move(output).to_byte_array(), std::move(output.schemas_) };
     }
 
     template<typename T>
@@ -1847,7 +1852,9 @@ public:
 
         output.write_object<T>(object);
 
-        return { std::move(output).to_byte_array() };
+        auto schemas = output.schemas_;
+
+        return { std::move(output).to_byte_array(), std::move(schemas) };
     }
 
     template<typename T>

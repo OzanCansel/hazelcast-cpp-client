@@ -1320,25 +1320,6 @@ consistency_lost::consistency_lost(std::string source,
                false)
 {}
 
-schema_not_replicated::schema_not_replicated(const std::string& source ,
-                                             const std::string& message ,
-                                             serialization::pimpl::schema sch)
-    :   hazelcast_ ("schema_not_replicated",
-                     protocol::SCHEMA_NOT_REPLICATED,
-                     source,
-                     message,
-                     "",
-                     nullptr,
-                     true,
-                     true)
-    ,   schema_{std::move(sch)}
-{}
-
-const serialization::pimpl::schema& schema_not_replicated::schema() const
-{
-    return schema_;
-}
-
 query::query(std::string source,
              std::string message,
              std::string details,
