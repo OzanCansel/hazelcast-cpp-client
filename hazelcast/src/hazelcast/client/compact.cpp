@@ -627,9 +627,9 @@ create_compact_reader(
   object_data_input& object_data_input,
   const pimpl::schema& schema)
 {
-    return compact_reader{compact_stream_serializer,
-                          object_data_input,
-                          schema};
+    return compact_reader{ compact_stream_serializer,
+                           object_data_input,
+                           schema };
 }
 
 } // namespace pimpl
@@ -1780,9 +1780,10 @@ operator!=(const schema& x, const schema& y)
 std::ostream&
 operator<<(std::ostream& os, const schema& schema)
 {
-    os << "type name " << schema.type_name() << ",number of var size fields "
-       << schema.number_of_var_size_fields() << ",fixed size fields length "
-       << schema.fixed_size_fields_length() << ",fields {";
+    os << "Schema { className = " << schema.type_name()
+       << ", numberOfComplextFields = " << schema.number_of_var_size_fields()
+       << ",primitivesLength = " << schema.fixed_size_fields_length()
+       << ",fields {";
     for (const auto& item : schema.fields()) {
         os << item.first << " " << item.second << ",";
     }
