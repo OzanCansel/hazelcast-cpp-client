@@ -1186,9 +1186,10 @@ data::data()
   : cached_hash_value_(-1)
 {}
 
-data::data(std::vector<byte> buffer)
+data::data(std::vector<byte> buffer, boost::optional<std::vector<serialization::pimpl::schema>> s)
   : data_(std::move(buffer))
   , cached_hash_value_(-1)
+  , schemas_{std::move(s)}
 {
     size_t size = data_.size();
     if (size > 0 && size < data::DATA_OVERHEAD) {
