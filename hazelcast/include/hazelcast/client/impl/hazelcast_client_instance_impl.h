@@ -222,6 +222,8 @@ public:
 
     sql::sql_service& get_sql();
 
+    void send_state_to_cluster();
+
 private:
     client_config client_config_;
     client_properties client_properties_;

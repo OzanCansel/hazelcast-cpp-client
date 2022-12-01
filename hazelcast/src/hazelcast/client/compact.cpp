@@ -1813,9 +1813,18 @@ schema_writer::build() &&
 }
 
 default_schema_service::default_schema_service(spi::ClientContext& context)
+<<<<<<< Updated upstream
     :   context_ {context}
     ,   max_put_retry_count_ {
+<<<<<<< Updated upstream
             context.get_client_properties().get_integer(
+=======
+            context_.get_client_properties().get_integer(
+=======
+    :   max_put_retry_count_ {
+            context.get_client_properties().get_integer(
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
                 client_property { MAX_PUT_RETRY_COUNT, MAX_PUT_RETRY_COUNT_DEFAULT }
             )
         }
@@ -1824,12 +1833,14 @@ default_schema_service::default_schema_service(spi::ClientContext& context)
                 context.get_client_properties().get_invocation_retry_pause_millis()
             )
         }
+    ,   context_ {context}
+    ,   logger_ {context.get_logger()}
 {}
 
 schema
 default_schema_service::get(int64_t schemaId)
 {
-    auto ptr = schemas.get(schemaId);
+    auto ptr = schemas_.get(schemaId);
 
     if (!ptr) {
         throw exception::illegal_state {
@@ -1845,6 +1856,52 @@ boost::future<void>
 default_schema_service::replicate_schema(schema s)
 {
     return replicate_schema_attempt(std::move(s));
+}
+
+void
+default_schema_service::replicate_all_schemas()
+{
+    using level = hazelcast::logger::level;
+    using namespace protocol::codec;
+
+    if (schemas_.empty()){
+        if (logger_.enabled(level::finest)){
+            logger_.log(level::finest, "There is no schema to send to the cluster.");
+        }
+
+        return;
+    }
+
+    std::vector<std::shared_ptr<schema>> schemas_sptr = schemas_.values();
+    std::vector<schema> all_schemas;
+
+    all_schemas.reserve(schemas_sptr.size());
+
+    transform(
+        begin(schemas_sptr),
+        end(schemas_sptr),
+        back_inserter(all_schemas),
+        [](const std::shared_ptr<schema>& s){
+            return *s;
+        }
+    );
+
+    if (logger_.enabled(level::finest)){
+        logger_.log(
+            level::finest,
+            (
+                boost::format("Sending schemas to the cluster %1%") % all_schemas
+            ).str()
+        );
+    }
+
+    auto message = client_sendallschemas_encode(all_schemas);
+
+    auto invocation = spi::impl::ClientInvocation::create(
+        context_, message, SERVICE_NAME
+    );
+
+    invocation->invoke().get();
 }
 
 boost::future<void>
@@ -1912,7 +1969,7 @@ default_schema_service::replicate_schema_attempt(schema s, int attempts)
                         }
 
                         auto s_p = std::make_shared<schema>(std::move(s));
-                        auto existing = schemas.put_if_absent(s.schema_id(), s_p);
+                        auto existing = schemas_.put_if_absent(s.schema_id(), s_p);
 
                         if (!existing) {
                             return;
@@ -1936,7 +1993,33 @@ default_schema_service::replicate_schema_attempt(schema s, int attempts)
 
 bool default_schema_service::is_schema_replicated(const schema& s)
 {
+<<<<<<< Updated upstream
     return bool(schemas.get(s.schema_id()));
+=======
+<<<<<<< Updated upstream
+    const std::shared_ptr<pimpl::schema>& ptr = schemas.get(s.schema_id());
+
+    if (!ptr) {
+        throw exception::schema_not_replicated(
+          "schema service", "schema not replicated to the cluster", s);
+    }
+=======
+    return bool(schemas_.get(s.schema_id()));
+}
+
+std::ostream&
+operator<<(std::ostream& os, const std::vector<schema>& schemas)
+{
+    os << "Map {";
+
+    for (const auto& s : schemas)
+        os << s << " , ";
+
+    os << "}";
+
+    return os;
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
 }
 
 compact_stream_serializer::compact_stream_serializer(default_schema_service& service)

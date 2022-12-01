@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include <ostream>
+
 #include "hazelcast/util/export.h"
 #include "hazelcast/util/SynchronizedMap.h"
 #include "hazelcast/client/spi/ClientContext.h"
@@ -56,7 +58,20 @@ public:
     */
     boost::future<void> replicate_schema(schema);
 
+<<<<<<< Updated upstream
     bool is_schema_replicated(const schema&);
+=======
+<<<<<<< Updated upstream
+    void check_schema_replicated(const schema&);
+=======
+    /**
+     * Replicates all schemas on cluster
+    */
+    void replicate_all_schemas();
+
+    bool is_schema_replicated(const schema&);
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
 
 private:
 
@@ -65,8 +80,12 @@ private:
     int retry_pause_millis_;
     int max_put_retry_count_;
     spi::ClientContext& context_;
-    util::SynchronizedMap<int64_t, schema> schemas;
+    logger& logger_;
+    util::SynchronizedMap<int64_t, schema> schemas_;
 };
+
+std::ostream& HAZELCAST_API
+operator<<(std::ostream&, const std::vector<schema>&);
 
 }
 }

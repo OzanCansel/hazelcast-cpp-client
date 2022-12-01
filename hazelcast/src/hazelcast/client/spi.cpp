@@ -1384,6 +1384,7 @@ boost::future<protocol::ClientMessage>
 ClientInvocation::invoke()
 {
     assert(client_message_.load());
+<<<<<<< Updated upstream
 
     auto fn = [this](){
         // for back pressure
@@ -1395,6 +1396,35 @@ ClientInvocation::invoke()
         }
         auto id_seq = call_id_sequence_;
         return invocation_promise_.get_future().then(
+=======
+<<<<<<< Updated upstream
+    // for back pressure
+    call_id_sequence_->next();
+    invoke_on_selection();
+    if (!lifecycle_service_.is_running()) {
+        return invocation_promise_.get_future().then(
+          [](boost::future<protocol::ClientMessage> f) { return f.get(); });
+    }
+    auto id_seq = call_id_sequence_;
+    return invocation_promise_.get_future().then(
+      execution_service_->get_user_executor(),
+      [=](boost::future<protocol::ClientMessage> f) {
+          id_seq->complete();
+          return f.get();
+      });
+=======
+
+    auto actual_work = [this](){
+        // for back pressure
+        call_id_sequence_->next();
+        invoke_on_selection();
+        if (!lifecycle_service_.is_running()) {
+            return invocation_promise_.get_future().then(
+            [](boost::future<protocol::ClientMessage> f) { return f.get(); });
+        }
+        auto id_seq = call_id_sequence_;
+        return invocation_promise_.get_future().then(
+>>>>>>> Stashed changes
         execution_service_->get_user_executor(),
         [=](boost::future<protocol::ClientMessage> f) {
             id_seq->complete();
@@ -1410,16 +1440,29 @@ ClientInvocation::invoke()
 
         return replicate_schemas(schemas).then(
             boost::launch::sync,
+<<<<<<< Updated upstream
             [this, fn, self](boost::future<std::vector<boost::future<void>>> replications){
                 for (auto& replication : replications.get())
                     replication.get();
 
                 return fn();
+=======
+            [this, actual_work, self](boost::future<std::vector<boost::future<void>>> replications){
+                for (auto& replication : replications.get())
+                    replication.get();
+
+                return actual_work();
+>>>>>>> Stashed changes
             }
         ).unwrap();
     }
 
+<<<<<<< Updated upstream
     return fn();
+=======
+    return actual_work();
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
 }
 
 boost::future<protocol::ClientMessage>
