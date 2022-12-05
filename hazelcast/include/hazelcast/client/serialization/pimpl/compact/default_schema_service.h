@@ -65,7 +65,7 @@ private:
     int retry_pause_millis_;
     int max_put_retry_count_;
     spi::ClientContext& context_;
-    util::SynchronizedMap<int64_t, schema> schemas;
+    util::SynchronizedMap<int64_t, schema> schemas_;
 };
 
 }

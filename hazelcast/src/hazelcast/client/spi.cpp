@@ -1385,7 +1385,7 @@ ClientInvocation::invoke()
 {
     assert(client_message_.load());
 
-    auto fn = [this](){
+    auto actual_work = [this](){
         // for back pressure
         call_id_sequence_->next();
         invoke_on_selection();
@@ -1410,16 +1410,16 @@ ClientInvocation::invoke()
 
         return replicate_schemas(schemas).then(
             boost::launch::sync,
-            [this, fn, self](boost::future<std::vector<boost::future<void>>> replications){
+            [this, actual_work, self](boost::future<std::vector<boost::future<void>>> replications){
                 for (auto& replication : replications.get())
                     replication.get();
 
-                return fn();
+                return actual_work();
             }
         ).unwrap();
     }
 
-    return fn();
+    return actual_work();
 }
 
 boost::future<protocol::ClientMessage>
@@ -1428,7 +1428,7 @@ ClientInvocation::invoke_urgent()
     assert(client_message_.load());
     urgent_ = true;
 
-    auto fn = [this](){
+    auto actual_work = [this](){
         // for back pressure
         call_id_sequence_->force_next();
         invoke_on_selection();
@@ -1451,16 +1451,16 @@ ClientInvocation::invoke_urgent()
         auto self = shared_from_this();
 
         return replicate_schemas(schemas).then(
-            [this, fn, self](boost::future<std::vector<boost::future<void>>> replications){
+            [this, actual_work, self](boost::future<std::vector<boost::future<void>>> replications){
                 for (auto& replication : replications.get())
                     replication.get();
 
-                return fn();
+                return actual_work();
             }
         ).unwrap();
     }
 
-    return fn();
+    return actual_work();
 }
 
 boost::future<std::vector<boost::future<void>>>
