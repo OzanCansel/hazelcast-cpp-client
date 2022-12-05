@@ -1829,7 +1829,7 @@ default_schema_service::default_schema_service(spi::ClientContext& context)
 schema
 default_schema_service::get(int64_t schemaId)
 {
-    auto ptr = schemas_.get(schemaId);
+    auto ptr = replicateds_.get(schemaId);
 
     if (!ptr) {
         throw exception::illegal_state {
@@ -1912,7 +1912,7 @@ default_schema_service::replicate_schema_attempt(schema s, int attempts)
                         }
 
                         auto s_p = std::make_shared<schema>(std::move(s));
-                        auto existing = schemas_.put_if_absent(s.schema_id(), s_p);
+                        auto existing = replicateds_.put_if_absent(s.schema_id(), s_p);
 
                         if (!existing) {
                             return;
@@ -1936,7 +1936,7 @@ default_schema_service::replicate_schema_attempt(schema s, int attempts)
 
 bool default_schema_service::is_schema_replicated(const schema& s)
 {
-    return bool(schemas_.get(s.schema_id()));
+    return bool(replicateds_.get(s.schema_id()));
 }
 
 compact_stream_serializer::compact_stream_serializer(default_schema_service& service)
