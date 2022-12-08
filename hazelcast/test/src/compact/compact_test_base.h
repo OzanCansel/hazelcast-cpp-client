@@ -43,6 +43,12 @@ public:
 
 protected:
 
+    template<typename T>
+    schema_t get_schema()
+    {
+        return serialization::pimpl::schema_of<T>::schema_v;
+    }
+
     HazelcastServerFactory factory_;
     HazelcastServer member_;
     hazelcast_client client;
