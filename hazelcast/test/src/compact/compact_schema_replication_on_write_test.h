@@ -81,18 +81,18 @@ protected:
 
 TEST_F(CompactSchemaReplicationOnWrite, imap_put)
 {
-    auto schema_parent = this->get_schema<a_type>();
-    auto schema_child = this->get_schema<nested_type>();
+    auto schema_parent = get_schema<a_type>();
+    auto schema_child = get_schema<nested_type>();
 
-    ASSERT_EQ(this->check_schema_on_backend(schema_parent), false);
-    ASSERT_EQ(this->check_schema_on_backend(schema_child), false);
+    ASSERT_EQ(check_schema_on_backend(schema_parent), false);
+    ASSERT_EQ(check_schema_on_backend(schema_child), false);
 
     auto map = client.get_map(random_string()).get();
 
     map->put(random_string(), a_type{}).get();
 
-    ASSERT_EQ(this->check_schema_on_backend(schema_parent), true);
-    ASSERT_EQ(this->check_schema_on_backend(schema_child), true);
+    ASSERT_EQ(check_schema_on_backend(schema_parent), true);
+    ASSERT_EQ(check_schema_on_backend(schema_child), true);
 }
 
 } // namespace compact
