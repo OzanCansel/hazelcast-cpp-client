@@ -23,12 +23,12 @@
 
 #include "hazelcast/client/spi/ClientContext.h"
 
-
-inline
-hazelcast::client::serialization::pimpl::default_schema_service&
+inline hazelcast::client::serialization::pimpl::default_schema_service&
 null_schema_service()
 {
-    return *static_cast<hazelcast::client::serialization::pimpl::default_schema_service*>(nullptr);
+    return *static_cast<
+      hazelcast::client::serialization::pimpl::default_schema_service*>(
+      nullptr);
 }
 
 inline std::string

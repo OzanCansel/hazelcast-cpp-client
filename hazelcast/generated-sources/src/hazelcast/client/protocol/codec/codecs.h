@@ -3081,13 +3081,13 @@ sql_fetch_encode(const sql::impl::query_id& query_id,
 
 /**
  * Replicates schema on cluster
-*/
+ */
 ClientMessage HAZELCAST_API
 send_schema_request_encode(const serialization::pimpl::schema& sch);
 
 /**
  * Decodes response of send schema request
-*/
+ */
 std::vector<boost::uuids::uuid> HAZELCAST_API
 send_schema_response_decode(ClientMessage&);
 

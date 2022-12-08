@@ -834,11 +834,13 @@ public:
 TEST_F(PortableVersionTest, test_nestedPortable_versionedSerializer)
 {
     serialization_config serializationConfig;
-    serialization::pimpl::SerializationService ss1(serializationConfig, null_schema_service());
+    serialization::pimpl::SerializationService ss1(serializationConfig,
+                                                   null_schema_service());
 
     serialization_config serializationConfig2;
     serializationConfig2.set_portable_version(6);
-    serialization::pimpl::SerializationService ss2(serializationConfig2, null_schema_service());
+    serialization::pimpl::SerializationService ss2(serializationConfig2,
+                                                   null_schema_service());
 
     // make sure ss2 cached class definition of Child
     {
@@ -1279,7 +1281,8 @@ TEST_F(ClientSerializationTest, testStringLiterals)
 {
     auto literal = R"delimeter(My example string literal)delimeter";
     serialization_config config;
-    serialization::pimpl::SerializationService serializationService(config, null_schema_service());
+    serialization::pimpl::SerializationService serializationService(
+      config, null_schema_service());
     auto data = serializationService.to_data(literal);
     auto obj = serializationService.to_object<decltype(literal)>(data);
     ASSERT_TRUE(obj);
@@ -1489,7 +1492,8 @@ TEST_F(ClientSerializationTest, testPrimitiveArrays)
 TEST_F(ClientSerializationTest, testWriteObjectWithPortable)
 {
     serialization_config serializationConfig;
-    serialization::pimpl::SerializationService ss(serializationConfig, null_schema_service());
+    serialization::pimpl::SerializationService ss(serializationConfig,
+                                                  null_schema_service());
 
     ObjectCarryingPortable<TestNamedPortable> objectCarryingPortable{
         TestNamedPortable{ "name", 2 }
@@ -1504,7 +1508,8 @@ TEST_F(ClientSerializationTest, testWriteObjectWithPortable)
 TEST_F(ClientSerializationTest, testWriteObjectWithIdentifiedDataSerializable)
 {
     serialization_config serializationConfig;
-    serialization::pimpl::SerializationService ss(serializationConfig, null_schema_service());
+    serialization::pimpl::SerializationService ss(serializationConfig,
+                                                  null_schema_service());
 
     ObjectCarryingPortable<TestDataSerializable> objectCarryingPortable{
         TestDataSerializable{ 2, 'c' }
@@ -1519,7 +1524,8 @@ TEST_F(ClientSerializationTest, testWriteObjectWithIdentifiedDataSerializable)
 TEST_F(ClientSerializationTest, testWriteObjectWithCustomXSerializable)
 {
     serialization_config serializationConfig;
-    serialization::pimpl::SerializationService ss(serializationConfig, null_schema_service());
+    serialization::pimpl::SerializationService ss(serializationConfig,
+                                                  null_schema_service());
     ObjectCarryingPortable<TestCustomXSerializable> objectCarryingPortable{
         TestCustomXSerializable{ 131321 }
     };
@@ -1534,7 +1540,8 @@ TEST_F(ClientSerializationTest, testWriteObjectWithCustomXSerializable)
 TEST_F(ClientSerializationTest, testWriteObjectWithCustomPersonSerializable)
 {
     serialization_config serializationConfig;
-    serialization::pimpl::SerializationService ss(serializationConfig, null_schema_service());
+    serialization::pimpl::SerializationService ss(serializationConfig,
+                                                  null_schema_service());
 
     ObjectCarryingPortable<TestCustomPerson> objectCarryingPortable{
         TestCustomPerson{ "TestCustomPerson" }
@@ -1550,7 +1557,8 @@ TEST_F(ClientSerializationTest, testNullData)
 {
     serialization::pimpl::data data;
     serialization_config serializationConfig;
-    serialization::pimpl::SerializationService ss(serializationConfig, null_schema_service());
+    serialization::pimpl::SerializationService ss(serializationConfig,
+                                                  null_schema_service());
     auto ptr = ss.to_object<int32_t>(data);
     ASSERT_FALSE(ptr.has_value());
 }

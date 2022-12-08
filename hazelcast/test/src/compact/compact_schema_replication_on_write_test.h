@@ -41,24 +41,21 @@ namespace compact {
 class CompactSchemaReplicationOnWrite : public testing::Test
 {
 private:
-
     HazelcastServerFactory factory_;
     HazelcastServer member_;
 
 public:
-
     using schema_t = serialization::pimpl::schema;
 
     CompactSchemaReplicationOnWrite()
-        :   factory_ {"hazelcast/test/resources/compact.xml"}
-        ,   member_ {factory_}
-        ,   client {new_client().get()}
+      : factory_{ "hazelcast/test/resources/compact.xml" }
+      , member_{ factory_ }
+      , client{ new_client().get() }
     {
         remote_controller_client().ping();
     }
 
 protected:
-
     template<typename U>
     schema_t get_schema()
     {
@@ -67,7 +64,7 @@ protected:
 
     bool check_schema_on_backend(const schema_t& schema)
     {
-        std::ifstream ifs { "script.js" };
+        std::ifstream ifs{ "script.js" };
         Response response;
 
         std::stringstream script;
@@ -75,11 +72,10 @@ protected:
         script << ifs.rdbuf();
 
         remote_controller_client().executeOnController(
-            response,
-            factory_.get_cluster_id(),
-            (
-                boost::format(
-                    R"(
+          response,
+          factory_.get_cluster_id(),
+          (boost::format(
+             R"(
                         var schemas = instance_0.getOriginal().node.getSchemaService().getAllSchemas();
                         var iterator = schemas.iterator();
 
@@ -92,11 +88,10 @@ protected:
                         }
 
                         result = "" + exist;
-                    )"
-                ) % schema.schema_id()
-            ).str(),
-            Lang::JAVASCRIPT
-        );
+                    )") %
+           schema.schema_id())
+            .str(),
+          Lang::JAVASCRIPT);
 
         return response.result == "true";
     }
@@ -114,13 +109,13 @@ TEST_F(CompactSchemaReplicationOnWrite, imap_put)
 
     auto map = client.get_map(random_string()).get();
 
-    map->put(random_string(), a_type {}).get();
+    map->put(random_string(), a_type{}).get();
 
     ASSERT_EQ(this->check_schema_on_backend(schema_parent), true);
     ASSERT_EQ(this->check_schema_on_backend(schema_child), true);
 }
 
-}
-}
-}
-}
+} // namespace compact
+} // namespace test
+} // namespace client
+} // namespace hazelcast

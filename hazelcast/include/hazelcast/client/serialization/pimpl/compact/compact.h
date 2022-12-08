@@ -597,8 +597,7 @@ private:
                      const std::string& method_suffix);
     template<typename T>
     T read_primitive(const pimpl::field_descriptor& field_descriptor);
-    bool is_field_exists(const std::string& field_name,
-                         field_kind kind) const;
+    bool is_field_exists(const std::string& field_name, field_kind kind) const;
     const pimpl::field_descriptor& get_field_descriptor(
       const std::string& field_name) const;
     const pimpl::field_descriptor& get_field_descriptor(
@@ -688,10 +687,9 @@ private:
     static const offset_func SHORT_OFFSET_READER;
     static const offset_func INT_OFFSET_READER;
     template<typename T>
-    boost::optional<T> read_nullable_primitive(
-      const std::string& field_name,
-      field_kind kind,
-      field_kind nullable_kind);
+    boost::optional<T> read_nullable_primitive(const std::string& field_name,
+                                               field_kind kind,
+                                               field_kind nullable_kind);
     template<typename T>
     boost::optional<std::vector<boost::optional<T>>> read_array_of_nullable(
       const std::string& field_name,
@@ -1382,7 +1380,6 @@ private:
 class HAZELCAST_API compact_stream_serializer
 {
 public:
-
     compact_stream_serializer(default_schema_service&);
 
     template<typename T>
@@ -1394,7 +1391,6 @@ public:
     boost::future<void> replicate_schema(const schema&);
 
 private:
-
     default_schema_service& schema_service;
 };
 

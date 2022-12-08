@@ -5791,11 +5791,11 @@ sql_fetch_encode(const sql::impl::query_id& query_id,
 ClientMessage
 send_schema_request_encode(const serialization::pimpl::schema& sch)
 {
-    static constexpr int32_t MESSAGE_TYPE       = 4864; // 0x001300
-    static constexpr size_t  INITIAL_FRAME_SIZE =
-        ClientMessage::REQUEST_HEADER_LEN;
+    static constexpr int32_t MESSAGE_TYPE = 4864; // 0x001300
+    static constexpr size_t INITIAL_FRAME_SIZE =
+      ClientMessage::REQUEST_HEADER_LEN;
 
-    ClientMessage msg{INITIAL_FRAME_SIZE};
+    ClientMessage msg{ INITIAL_FRAME_SIZE };
     msg.set_retryable(true);
     msg.set_operation_name("Client.SendSchema");
 
@@ -5813,7 +5813,6 @@ send_schema_response_decode(ClientMessage& m)
     m.skip_frame();
     return m.get<std::vector<boost::uuids::uuid>>();
 }
-
 
 } // namespace codec
 } // namespace protocol

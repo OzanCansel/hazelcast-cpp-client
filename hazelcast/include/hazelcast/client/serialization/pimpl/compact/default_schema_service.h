@@ -31,11 +31,10 @@ namespace pimpl {
 class HAZELCAST_API default_schema_service
 {
 public:
-
     static constexpr const char* SERVICE_NAME = "schema-service";
     /**
      * Maximum number of attempts for schema replication process.
-    */
+     */
     static constexpr const char* MAX_PUT_RETRY_COUNT =
       "hazelcast.client.schema.max.put.retry.count";
     static constexpr const char* MAX_PUT_RETRY_COUNT_DEFAULT = "100";
@@ -53,13 +52,12 @@ public:
 
     /**
      * Replicates schema on the cluster
-    */
+     */
     boost::future<void> replicate_schema(schema);
 
     bool is_schema_replicated(const schema&);
 
 private:
-
     boost::future<void> replicate_schema_attempt(schema, int attempts = 0);
 
     int retry_pause_millis_;
@@ -68,7 +66,7 @@ private:
     util::SynchronizedMap<int64_t, schema> replicateds_;
 };
 
-}
-}
-}
-}
+} // namespace pimpl
+} // namespace serialization
+} // namespace client
+} // namespace hazelcast

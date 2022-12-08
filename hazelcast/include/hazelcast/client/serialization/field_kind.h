@@ -71,6 +71,6 @@ enum class HAZELCAST_API field_kind
 std::ostream& HAZELCAST_API
 operator<<(std::ostream&, field_kind);
 
-}
-}
-}
+} // namespace serialization
+} // namespace client
+} // namespace hazelcast

@@ -1212,11 +1212,9 @@ public:
         std::memcpy(
           fp + SIZE_OF_FRAME_LENGTH_AND_FLAGS, &bytes[0], bytes.size());
 
-        copy(
-            begin(value.schemas_will_be_replicated()),
-            end(value.schemas_will_be_replicated()),
-            back_inserter(schemas_will_be_replicated_)
-        );
+        copy(begin(value.schemas_will_be_replicated()),
+             end(value.schemas_will_be_replicated()),
+             back_inserter(schemas_will_be_replicated_));
     }
 
     inline void set(const serialization::pimpl::data* value,
@@ -1300,7 +1298,8 @@ public:
     {
         add_begin_frame();
 
-        set(frame_header_type{ SIZE_OF_FRAME_LENGTH_AND_FLAGS + INT32_SIZE, DEFAULT_FLAGS});
+        set(frame_header_type{ SIZE_OF_FRAME_LENGTH_AND_FLAGS + INT32_SIZE,
+                               DEFAULT_FLAGS });
         set(int32_t(descriptor.kind));
         set(field_name);
 
@@ -1316,13 +1315,14 @@ public:
         { // Fields list
             add_begin_frame();
 
-                for (const auto& p : s.fields())
-                {
-                    const std::string& field_name { p.first };
-                    const serialization::pimpl::field_descriptor& descriptor { p.second };
+            for (const auto& p : s.fields()) {
+                const std::string& field_name{ p.first };
+                const serialization::pimpl::field_descriptor& descriptor{
+                    p.second
+                };
 
-                    set(descriptor, field_name, false);
-                }
+                set(descriptor, field_name, false);
+            }
 
             add_end_frame(false);
         }

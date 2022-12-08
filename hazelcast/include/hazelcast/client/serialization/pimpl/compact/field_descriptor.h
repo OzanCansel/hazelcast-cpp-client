@@ -31,16 +31,14 @@ namespace pimpl {
 
 struct HAZELCAST_API field_descriptor
 {
-    field_descriptor(
-        field_kind k = field_kind(-1),
-        int32_t i = -1,
-        int32_t o = -1,
-        int8_t b = -1
-    );
+    field_descriptor(field_kind k = field_kind(-1),
+                     int32_t i = -1,
+                     int32_t o = -1,
+                     int8_t b = -1);
 
     /**
      * Kind of the field
-    */
+     */
     field_kind kind;
 
     /**
@@ -65,10 +63,10 @@ operator==(const field_descriptor& x, const field_descriptor& y);
 std::ostream& HAZELCAST_API
 operator<<(std::ostream& os, const field_descriptor&);
 
-}
-}
-}
-}
+} // namespace pimpl
+} // namespace serialization
+} // namespace client
+} // namespace hazelcast
 
 #if defined(WIN32) || defined(_WIN32) || defined(WIN64) || defined(_WIN64)
 #pragma warning(pop)

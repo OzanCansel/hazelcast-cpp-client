@@ -39,8 +39,8 @@ struct a_type
     nested_type nested;
 };
 
-}
-}
+} // namespace compact
+} // namespace test
 
 namespace serialization {
 
@@ -72,7 +72,8 @@ struct hz_serializer<test::compact::a_type> : compact_serializer
                       compact_writer& writer)
     {
         writer.write_boolean("x", object.x);
-        writer.write_compact<test::compact::nested_type>("nested", object.nested);
+        writer.write_compact<test::compact::nested_type>("nested",
+                                                         object.nested);
     }
 
     static test::compact::a_type read(compact_reader& reader)
@@ -80,7 +81,8 @@ struct hz_serializer<test::compact::a_type> : compact_serializer
         test::compact::a_type object;
 
         object.x = reader.read_int32("x");
-        object.nested = *reader.read_compact<test::compact::nested_type>("nested");
+        object.nested =
+          *reader.read_compact<test::compact::nested_type>("nested");
 
         return object;
     }
@@ -88,6 +90,6 @@ struct hz_serializer<test::compact::a_type> : compact_serializer
     static std::string type_name() { return "a_type"; }
 };
 
-}
-}
-}
+} // namespace serialization
+} // namespace client
+} // namespace hazelcast
