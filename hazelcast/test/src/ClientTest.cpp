@@ -28,6 +28,7 @@
 
 #include "HazelcastServerFactory.h"
 #include "remote_controller_client.h"
+#include "TestHelperFunctions.h"
 
 namespace hazelcast {
 namespace client {
@@ -104,16 +105,6 @@ std::string
 ClientTest::random_map_name()
 {
     return random_string();
-}
-
-std::string
-ClientTest::random_string()
-{
-    // performance is not important, hence we can use random_device for the
-    // tests
-    std::random_device rand{};
-    return boost::uuids::to_string(
-      boost::uuids::basic_random_generator<std::random_device>{ rand }());
 }
 
 boost::uuids::uuid
