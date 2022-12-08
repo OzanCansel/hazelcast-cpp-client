@@ -1388,8 +1388,6 @@ public:
     template<typename T>
     void write(const T& object, object_data_output& out);
 
-    boost::future<void> replicate_schema(const schema&);
-
 private:
     default_schema_service& schema_service;
 };
