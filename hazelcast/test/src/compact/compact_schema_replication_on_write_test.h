@@ -17,6 +17,7 @@
 #include <memory>
 #include <fstream>
 #include <sstream>
+#include <functional>
 
 #include <gtest/gtest.h>
 
@@ -25,6 +26,7 @@
 #include "../HazelcastServerFactory.h"
 #include "../HazelcastServer.h"
 #include "../remote_controller_client.h"
+#include "../TestHelperFunctions.h"
 
 #if defined(WIN32) || defined(_WIN32) || defined(WIN64) || defined(_WIN64)
 #pragma warning(push)
@@ -36,7 +38,7 @@ namespace client {
 namespace test {
 namespace compact {
 
-class CompactSchemaReplicationOnWrite : public ::testing::Test
+class CompactSchemaReplicationOnWrite : public testing::Test
 {
 private:
 
@@ -57,10 +59,10 @@ public:
 
 protected:
 
-    template<typename T>
+    template<typename U>
     schema_t get_schema()
     {
-        return serialization::pimpl::schema_of<T>::schema_v;
+        return serialization::pimpl::schema_of<U>::schema_v;
     }
 
     bool check_schema_on_backend(const schema_t& schema)
@@ -75,35 +77,50 @@ protected:
         remote_controller_client().executeOnController(
             response,
             factory_.get_cluster_id(),
-            script.str(),
-            // R"(
-            //     var schemas = instance_0.getOriginal().node.getSchemaService().getAllSchemas();
+            (
+                boost::format(
+                    R"(
+                        var schemas = instance_0.getOriginal().node.getSchemaService().getAllSchemas();
+                        var iterator = schemas.iterator();
 
-            //     result = schemas;
-            // )",
+                        var exist = false;
+                        while(iterator.hasNext()){
+                            var schema = iterator.next();
+
+                            if (schema.getSchemaId() == "%1%")
+                                exist = true;
+                        }
+
+                        result = "" + exist;
+                    )"
+                ) % schema.schema_id()
+            ).str(),
             Lang::JAVASCRIPT
         );
 
-        std::cout << response.result << std::endl;
-
-        return false;
+        return response.result == "true";
     }
 
     hazelcast_client client;
 };
 
-TEST_F(CompactSchemaReplicationOnWrite, test_write)
+TEST_F(CompactSchemaReplicationOnWrite, imap_put)
 {
-    auto schema_parent = get_schema<a_type>();
-    auto schema_child = get_schema<nested_type>();
+    auto schema_parent = this->get_schema<a_type>();
+    auto schema_child = this->get_schema<nested_type>();
 
-    check_schema_on_backend(schema_parent);
+    ASSERT_EQ(this->check_schema_on_backend(schema_parent), false);
+    ASSERT_EQ(this->check_schema_on_backend(schema_child), false);
 
-    auto map = client.get_map("imap").get();
+    auto map = client.get_map(random_string()).get();
+
+    map->put(random_string(), a_type {}).get();
+
+    ASSERT_EQ(this->check_schema_on_backend(schema_parent), true);
+    ASSERT_EQ(this->check_schema_on_backend(schema_child), true);
 }
 
 }
-
 }
 }
 }
