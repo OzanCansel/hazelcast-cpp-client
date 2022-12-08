@@ -1979,12 +1979,6 @@ compact_stream_serializer::compact_stream_serializer(
 {
 }
 
-boost::future<void>
-compact_stream_serializer::replicate_schema(const schema& sch)
-{
-    return schema_service.replicate_schema(sch);
-}
-
 field_kind_based_operations::field_kind_based_operations()
   : kind_size_in_byte_func(DEFAULT_KIND_SIZE_IN_BYTES)
 {}
