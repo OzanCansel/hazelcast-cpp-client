@@ -41,13 +41,6 @@ namespace compact {
 class CompactSchemaReplicationOnWrite : public compact_test_base
 {
 protected:
-    using schema_t = serialization::pimpl::schema;
-
-    template<typename U>
-    schema_t get_schema()
-    {
-        return serialization::pimpl::schema_of<U>::schema_v;
-    }
 
     bool check_schema_on_backend(const schema_t& schema)
     {

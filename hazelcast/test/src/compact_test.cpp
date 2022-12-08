@@ -1022,3 +1022,4 @@ TEST_F(CompactNullablePrimitiveInteroperabilityTest,
 } // namespace hazelcast
 
 #include "compact/compact_schema_replication_on_write_test.h"
+#include "compact/compact_schema_validation.h"
