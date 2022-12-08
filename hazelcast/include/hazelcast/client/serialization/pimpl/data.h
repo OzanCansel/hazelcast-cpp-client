@@ -36,7 +36,6 @@ namespace pimpl {
 class HAZELCAST_API data
 {
 public:
-
     using schemas_t = std::vector<serialization::pimpl::schema>;
 
     // type and partition_hash are always written with BIG_ENDIAN byte-order
@@ -50,7 +49,8 @@ public:
 
     data();
 
-    data(std::vector<byte> buffer, schemas_t will_be_replicated_schemas = schemas_t{} );
+    data(std::vector<byte> buffer,
+         schemas_t will_be_replicated_schemas = schemas_t{});
 
     size_t data_size() const;
 
@@ -77,7 +77,6 @@ public:
     friend bool HAZELCAST_API operator==(const data& lhs, const data& rhs);
 
 private:
-
     schemas_t schemas_will_be_replicated_;
     std::vector<byte> data_;
     int cached_hash_value_;

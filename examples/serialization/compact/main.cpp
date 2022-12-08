@@ -27,8 +27,7 @@ struct PersonDTO
 std::ostream&
 operator<<(std::ostream& os, const PersonDTO& person)
 {
-    os << "name: " << person.name
-       << " surname: " << person.surname
+    os << "name: " << person.name << " surname: " << person.surname
        << " age: " << person.age;
 
     return os;
@@ -59,24 +58,25 @@ struct hz_serializer<PersonDTO> : compact_serializer
         return person;
     }
 
-    static std::string type_name()
-    {
-        return "person";
-    }
+    static std::string type_name() { return "person"; }
 };
 
 } // namespace serialization
 } // namespace client
 } // namespace hazelcast
 
+/**
+ * This example demonstrates how to use a type with compact serialization.
+*/
 int
 main()
 {
-    auto hz  = hazelcast::new_client().get();
+    auto hz = hazelcast::new_client().get();
     auto map = hz.get_map("map").get();
 
-    map->put("Peter", PersonDTO {"Peter", "Stone", 45}).get();
-    auto person = map->get<std::string, PersonDTO>(std::string{ "Peter" }).get();
+    map->put("Peter", PersonDTO{ "Peter", "Stone", 45 }).get();
+    auto person =
+      map->get<std::string, PersonDTO>(std::string{ "Peter" }).get();
 
     std::cout << person << std::endl;
 

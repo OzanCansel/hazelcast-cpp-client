@@ -237,11 +237,10 @@ compact_reader::read()
 
 template<typename T>
 boost::optional<T>
-compact_reader::read_array_of_primitive(
-  const std::string& field_name,
-  field_kind kind,
-  field_kind nullable_kind,
-  const std::string& method_suffix)
+compact_reader::read_array_of_primitive(const std::string& field_name,
+                                        field_kind kind,
+                                        field_kind nullable_kind,
+                                        const std::string& method_suffix)
 {
     auto& field_descriptor = get_field_descriptor(field_name);
     if (field_descriptor.kind == kind) {
@@ -317,10 +316,9 @@ compact_reader::read_nullable_array_as_primitive_array(
 
 template<typename T>
 boost::optional<T>
-compact_reader::read_nullable_primitive(
-  const std::string& field_name,
-  field_kind kind,
-  field_kind nullable_kind)
+compact_reader::read_nullable_primitive(const std::string& field_name,
+                                        field_kind kind,
+                                        field_kind nullable_kind)
 {
     auto& field_descriptor = get_field_descriptor(field_name);
     if (field_descriptor.kind == kind) {
@@ -333,10 +331,9 @@ compact_reader::read_nullable_primitive(
 
 template<typename T>
 boost::optional<std::vector<boost::optional<T>>>
-compact_reader::read_array_of_nullable(
-  const std::string& field_name,
-  field_kind kind,
-  field_kind nullable_kind)
+compact_reader::read_array_of_nullable(const std::string& field_name,
+                                       field_kind kind,
+                                       field_kind nullable_kind)
 {
     auto& field_descriptor = get_field_descriptor(field_name);
     if (field_descriptor.kind == kind) {
@@ -416,8 +413,7 @@ compact_writer::write_array_of_compact(
     if (default_compact_writer != nullptr) {
         default_compact_writer->write_array_of_compact<T>(field_name, value);
     } else {
-        schema_writer->add_field(field_name,
-                                 field_kind::ARRAY_OF_COMPACT);
+        schema_writer->add_field(field_name, field_kind::ARRAY_OF_COMPACT);
     }
 }
 namespace pimpl {

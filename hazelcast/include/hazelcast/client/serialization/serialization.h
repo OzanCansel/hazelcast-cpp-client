@@ -924,7 +924,6 @@ public:
     }
 
 private:
-
     using schemas_t = std::vector<pimpl::schema>;
 
     friend class pimpl::compact_stream_serializer;
@@ -1815,7 +1814,8 @@ namespace pimpl {
 class HAZELCAST_API SerializationService : public util::Disposable
 {
 public:
-    SerializationService(const serialization_config& config, default_schema_service&);
+    SerializationService(const serialization_config& config,
+                         default_schema_service&);
 
     PortableSerializer& get_portable_serializer();
 
@@ -1837,7 +1837,8 @@ public:
 
         output.write_object<T>(object);
 
-        return { std::move(output).to_byte_array(), move(output.schemas_will_be_replicated_) };
+        return { std::move(output).to_byte_array(),
+                 move(output.schemas_will_be_replicated_) };
     }
 
     template<typename T>
@@ -1854,7 +1855,8 @@ public:
 
         output.write_object<T>(object);
 
-        return { std::move(output).to_byte_array(), move(output.schemas_will_be_replicated_) };
+        return { std::move(output).to_byte_array(),
+                 move(output.schemas_will_be_replicated_) };
     }
 
     template<typename T>

@@ -59,7 +59,7 @@ operator!=(const schema& x, const schema& y);
 std::ostream& HAZELCAST_API
 operator<<(std::ostream& os, const schema& schema);
 
-}
-}
-}
-}
+} // namespace pimpl
+} // namespace serialization
+} // namespace client
+} // namespace hazelcast
