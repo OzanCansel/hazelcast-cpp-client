@@ -15,13 +15,13 @@
  */
 
 #include <memory>
-#include <fstream>
 #include <sstream>
 #include <functional>
 
 #include <gtest/gtest.h>
 
 #include "hazelcast/client/hazelcast_client.h"
+#include "compact_test_base.h"
 #include "serializables_for_compact.h"
 #include "../HazelcastServerFactory.h"
 #include "../HazelcastServer.h"
@@ -38,24 +38,11 @@ namespace client {
 namespace test {
 namespace compact {
 
-class CompactSchemaReplicationOnWrite : public testing::Test
+class CompactSchemaReplicationOnWrite : public compact_test_base
 {
-private:
-    HazelcastServerFactory factory_;
-    HazelcastServer member_;
-
-public:
+protected:
     using schema_t = serialization::pimpl::schema;
 
-    CompactSchemaReplicationOnWrite()
-      : factory_{ "hazelcast/test/resources/compact.xml" }
-      , member_{ factory_ }
-      , client{ new_client().get() }
-    {
-        remote_controller_client().ping();
-    }
-
-protected:
     template<typename U>
     schema_t get_schema()
     {
@@ -64,12 +51,7 @@ protected:
 
     bool check_schema_on_backend(const schema_t& schema)
     {
-        std::ifstream ifs{ "script.js" };
         Response response;
-
-        std::stringstream script;
-
-        script << ifs.rdbuf();
 
         remote_controller_client().executeOnController(
           response,
@@ -95,8 +77,6 @@ protected:
 
         return response.result == "true";
     }
-
-    hazelcast_client client;
 };
 
 TEST_F(CompactSchemaReplicationOnWrite, imap_put)
