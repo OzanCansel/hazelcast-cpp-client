@@ -1921,8 +1921,8 @@ default_schema_service::replicate_schema_attempt(schema s, int attempts)
               if (!contains) {
                   if (attempts >= max_retry_count) {
                       throw exception::illegal_state{
-                          ("default_schema_service::replicate_schema_attempt",
-                           boost::format("The schema %1% cannot be "
+                          "default_schema_service::replicate_schema_attempt",
+                          (boost::format("The schema %1% cannot be "
                                          "replicated in the cluster, after "
                                          "%2% retries. It might be the case "
                                          "that the client is experiencing a "
