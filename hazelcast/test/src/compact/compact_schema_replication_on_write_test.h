@@ -28,11 +28,6 @@
 #include "../remote_controller_client.h"
 #include "../TestHelperFunctions.h"
 
-#if defined(WIN32) || defined(_WIN32) || defined(WIN64) || defined(_WIN64)
-#pragma warning(push)
-#pragma warning(disable : 4996) // for unsafe getenv
-#endif
-
 namespace hazelcast {
 namespace client {
 namespace test {
@@ -92,7 +87,3 @@ TEST_F(CompactSchemaReplicationOnWrite, imap_put)
 } // namespace test
 } // namespace client
 } // namespace hazelcast
-
-#if defined(WIN32) || defined(_WIN32) || defined(WIN64) || defined(_WIN64)
-#pragma warning(pop)
-#endif
