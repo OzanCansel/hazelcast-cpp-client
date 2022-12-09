@@ -77,9 +77,9 @@ public:
     friend bool HAZELCAST_API operator==(const data& lhs, const data& rhs);
 
 private:
-    schemas_t schemas_will_be_replicated_;
     std::vector<byte> data_;
     int cached_hash_value_;
+    schemas_t schemas_will_be_replicated_;
 
     inline int calculate_hash() const;
 };
