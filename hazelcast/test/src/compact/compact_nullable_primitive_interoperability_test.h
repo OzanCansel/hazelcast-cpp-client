@@ -17,8 +17,8 @@
 #pragma once
 
 #include "compact_test_base.h"
-#include "primitive_object.h"
-#include "nullable_primitive_object.h"
+#include "serialization/primitive_object.h"
+#include "serialization/nullable_primitive_object.h"
 
 namespace hazelcast {
 namespace client {

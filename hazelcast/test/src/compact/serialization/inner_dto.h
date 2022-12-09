@@ -19,7 +19,7 @@
 #include "hazelcast/client/serialization/serialization.h"
 
 #include "named_dto.h"
-#include "compact_helper.h"
+#include "../compact_helper.h"
 
 namespace hazelcast {
 namespace client {
