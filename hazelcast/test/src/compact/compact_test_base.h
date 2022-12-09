@@ -54,6 +54,16 @@ protected:
     }
 
     template<typename T>
+    void replicate_schema()
+    {
+        auto schema = get_schema<T>();
+
+        spi::ClientContext context {client};
+
+        ASSERT_NO_THROW(context.get_schema_service().replicate_schema(schema).get());
+    }
+
+    template<typename T>
     schema_t get_schema()
     {
         return serialization::pimpl::schema_of<T>::schema_v;

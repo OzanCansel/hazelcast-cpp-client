@@ -129,9 +129,7 @@ TEST_F(CompactSchemaValidation, validate)
 {
     auto schema = get_schema<a_type>();
 
-    spi::ClientContext context {client};
-
-    ASSERT_NO_THROW(context.get_schema_service().replicate_schema(schema).get());
+    replicate_schema<a_type>();
 
     auto actual = read_schema_from_server(schema);
 
