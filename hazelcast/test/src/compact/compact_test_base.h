@@ -43,6 +43,16 @@ public:
 
 protected:
 
+    void SetUp() override {
+        auto version = client.get_cluster()
+                             .get_members()
+                             .front()
+                             .get_version();
+
+        if (version < member::version {5,2,0})
+            GTEST_SKIP();
+    }
+
     template<typename T>
     schema_t get_schema()
     {
