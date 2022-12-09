@@ -16,12 +16,19 @@
 
 #pragma once
 
+#include <boost/thread/future.hpp>
+
 #include "hazelcast/util/export.h"
 #include "hazelcast/util/SynchronizedMap.h"
-#include "hazelcast/client/spi/ClientContext.h"
+#include "hazelcast/client/serialization/pimpl/compact/schema.h"
 
 namespace hazelcast {
 namespace client {
+
+namespace spi {
+class ClientContext;
+}
+
 namespace serialization {
 namespace pimpl {
 
