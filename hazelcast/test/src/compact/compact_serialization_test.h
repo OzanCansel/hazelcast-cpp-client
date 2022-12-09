@@ -21,10 +21,10 @@
 #include "../TestHelperFunctions.h"
 
 #include "compact_test_base.h"
-#include "main_dto.h"
-#include "node_dto.h"
-#include "bits_dto.h"
-#include "employee_dto.h"
+#include "serialization/main_dto.h"
+#include "serialization/node_dto.h"
+#include "serialization/bits_dto.h"
+#include "serialization/employee_dto.h"
 
 namespace hazelcast {
 namespace client {

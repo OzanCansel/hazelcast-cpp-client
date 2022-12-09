@@ -27,7 +27,7 @@
 #include "../TestHelperFunctions.h"
 
 #include "compact_test_base.h"
-#include "a_type.h"
+#include "serialization/a_type.h"
 
 namespace hazelcast {
 namespace client {
