@@ -17,16 +17,12 @@
 #pragma once
 
 #include "hazelcast/client/serialization/serialization.h"
+#include "nested_type.h"
 
 namespace hazelcast {
 namespace client {
 namespace test {
 namespace compact {
-
-struct nested_type
-{
-    int y;
-};
 
 struct a_type
 {
@@ -34,31 +30,10 @@ struct a_type
     nested_type nested;
 };
 
-} // namespace compact
-} // namespace test
+}
+}
 
 namespace serialization {
-
-template<>
-struct hz_serializer<test::compact::nested_type> : compact_serializer
-{
-    static void write(const test::compact::nested_type& object,
-                      compact_writer& writer)
-    {
-        writer.write_int32("x", object.y);
-    }
-
-    static test::compact::nested_type read(compact_reader& reader)
-    {
-        test::compact::nested_type object;
-
-        object.y = reader.read_int32("y");
-
-        return object;
-    }
-
-    static std::string type_name() { return "nested_type"; }
-};
 
 template<>
 struct hz_serializer<test::compact::a_type> : compact_serializer
@@ -86,5 +61,5 @@ struct hz_serializer<test::compact::a_type> : compact_serializer
 };
 
 } // namespace serialization
-} // namespace client
-} // namespace hazelcast
+}
+}
