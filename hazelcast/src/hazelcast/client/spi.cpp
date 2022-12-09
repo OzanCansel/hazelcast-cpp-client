@@ -1410,7 +1410,7 @@ ClientInvocation::invoke()
           .then(
             boost::launch::sync,
             [this, actual_work, self](
-              boost::future<std::vector<boost::future<void>>> replications) {
+              boost::future<boost::csbl::vector<boost::future<void>>> replications) {
                 for (auto& replication : replications.get())
                     replication.get();
 
@@ -1454,7 +1454,7 @@ ClientInvocation::invoke_urgent()
         return replicate_schemas(schemas)
           .then(
             [this, actual_work, self](
-              boost::future<std::vector<boost::future<void>>> replications) {
+              boost::future<boost::csbl::vector<boost::future<void>>> replications) {
                 for (auto& replication : replications.get())
                     replication.get();
 
