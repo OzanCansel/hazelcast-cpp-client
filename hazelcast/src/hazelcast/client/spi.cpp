@@ -1466,7 +1466,7 @@ ClientInvocation::invoke_urgent()
     return actual_work();
 }
 
-boost::future<std::vector<boost::future<void>>>
+boost::future<boost::csbl::vector<boost::future<void>>>
 ClientInvocation::replicate_schemas(
   const std::vector<serialization::pimpl::schema>& schemas)
 {
