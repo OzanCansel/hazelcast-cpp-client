@@ -36,7 +36,7 @@ public:
     compact_test_base()
       : factory_{ "hazelcast/test/resources/compact.xml" }
       , member_{ factory_ }
-      , client{ new_client().get() }
+      , client{ new_client(config()).get() }
     {
         remote_controller_client().ping();
     }
@@ -72,6 +72,17 @@ protected:
     HazelcastServerFactory factory_;
     HazelcastServer member_;
     hazelcast_client client;
+
+private:
+
+    static client_config config()
+    {
+        client_config cfg;
+
+        cfg.set_cluster_name("compact-dev");
+
+        return cfg;
+    }
 };
 
 }
