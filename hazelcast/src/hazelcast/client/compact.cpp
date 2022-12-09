@@ -2017,6 +2017,8 @@ field_operations::get(field_kind kind)
             return field_kind_based_operations{ []() {
                 return Bits::DOUBLE_SIZE_IN_BYTES;
             } };
+        default:
+            return field_kind_based_operations{};
     }
 
     return field_kind_based_operations{};
