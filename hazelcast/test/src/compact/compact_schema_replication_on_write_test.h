@@ -21,12 +21,13 @@
 #include <gtest/gtest.h>
 
 #include "hazelcast/client/hazelcast_client.h"
-#include "compact_test_base.h"
-#include "serializables_for_compact.h"
 #include "../HazelcastServerFactory.h"
 #include "../HazelcastServer.h"
 #include "../remote_controller_client.h"
 #include "../TestHelperFunctions.h"
+
+#include "compact_test_base.h"
+#include "a_type.h"
 
 namespace hazelcast {
 namespace client {
