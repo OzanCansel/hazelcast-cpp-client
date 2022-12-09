@@ -1862,11 +1862,11 @@ schema_writer::build() &&
 }
 
 default_schema_service::default_schema_service(spi::ClientContext& context)
-  : context_{ context }
+  : retry_pause_millis_{ context.get_client_properties().get_integer(
+      context.get_client_properties().get_invocation_retry_pause_millis()) }
   , max_put_retry_count_{ context.get_client_properties().get_integer(
       client_property{ MAX_PUT_RETRY_COUNT, MAX_PUT_RETRY_COUNT_DEFAULT }) }
-  , retry_pause_millis_{ context.get_client_properties().get_integer(
-      context.get_client_properties().get_invocation_retry_pause_millis()) }
+  , context_{ context }
 {
 }
 
