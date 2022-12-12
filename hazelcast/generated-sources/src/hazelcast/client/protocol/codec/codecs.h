@@ -3091,6 +3091,12 @@ send_schema_request_encode(const serialization::pimpl::schema& sch);
 std::vector<boost::uuids::uuid> HAZELCAST_API
 send_schema_response_decode(ClientMessage&);
 
+/**
+ * Sends all the schemas to the cluster
+ */
+ClientMessage HAZELCAST_API
+client_sendallschemas_encode(const std::vector<serialization::pimpl::schema>& schemas);
+
 } // namespace codec
 } // namespace protocol
 } // namespace client

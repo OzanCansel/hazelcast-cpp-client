@@ -21,6 +21,7 @@
 #include "hazelcast/util/export.h"
 #include "hazelcast/util/SynchronizedMap.h"
 #include "hazelcast/client/serialization/pimpl/compact/schema.h"
+#include "hazelcast/logger.h"
 
 namespace hazelcast {
 namespace client {
@@ -28,7 +29,6 @@ namespace client {
 namespace spi {
 class ClientContext;
 }
-
 namespace serialization {
 namespace pimpl {
 
@@ -64,12 +64,19 @@ public:
 
     bool is_schema_replicated(const schema&);
 
+    /**
+     * Replicates all schemas on cluster
+    */
+    void replicate_all_schemas();
+
 private:
+
     boost::future<void> replicate_schema_attempt(schema, int attempts = 0);
 
     int retry_pause_millis_;
     int max_put_retry_count_;
     spi::ClientContext& context_;
+    logger& logger_;
     util::SynchronizedMap<int64_t, schema> replicateds_;
 };
 

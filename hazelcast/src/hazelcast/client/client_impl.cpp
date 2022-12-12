@@ -478,6 +478,12 @@ hazelcast_client_instance_impl::get_sql()
 }
 
 void
+hazelcast_client_instance_impl::send_state_to_cluster()
+{
+    schema_service_.replicate_all_schemas();
+}
+
+void
 hazelcast_client_instance_impl::check_discovery_configuration_consistency(
   bool address_list_provided,
   bool aws_enabled,

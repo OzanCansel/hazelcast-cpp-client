@@ -1872,6 +1872,7 @@ default_schema_service::default_schema_service(spi::ClientContext& context)
   , max_put_retry_count_{ context.get_client_properties().get_integer(
       client_property{ MAX_PUT_RETRY_COUNT, MAX_PUT_RETRY_COUNT_DEFAULT }) }
   , context_{ context }
+  , logger_ {context.get_logger()}
 {
 }
 
@@ -1984,6 +1985,65 @@ compact_stream_serializer::compact_stream_serializer(
 {
 }
 
+void
+default_schema_service::replicate_all_schemas()
+{
+    using level = hazelcast::logger::level;
+    using namespace protocol::codec;
+
+    if (replicateds_.empty()){
+        if (logger_.enabled(level::finest)){
+            logger_.log(level::finest, "There is no schema to send to the cluster.");
+        }
+
+        return;
+    }
+
+    std::vector<std::shared_ptr<schema>> schemas_sptr = replicateds_.values();
+    std::vector<schema> all_schemas;
+
+    all_schemas.reserve(schemas_sptr.size());
+
+    transform(
+        begin(schemas_sptr),
+        end(schemas_sptr),
+        back_inserter(all_schemas),
+        [](const std::shared_ptr<schema>& s){
+            return *s;
+        }
+    );
+
+    if (logger_.enabled(level::finest)){
+        logger_.log(
+            level::finest,
+            (
+                boost::format("Sending schemas to the cluster %1%") % all_schemas
+            ).str()
+        );
+    }
+
+    auto message = client_sendallschemas_encode(all_schemas);
+
+    auto invocation = spi::impl::ClientInvocation::create(
+        context_, message, SERVICE_NAME
+    );
+
+    invocation->invoke().get();
+}
+
+std::ostream&
+operator<<(std::ostream& os, const std::vector<schema>& schemas)
+{
+    os << "Map {";
+
+    for (const auto& s : schemas)
+        os << s << " , ";
+
+    os << "}";
+
+    return os;
+}
+
 field_kind_based_operations::field_kind_based_operations()
   : kind_size_in_byte_func(DEFAULT_KIND_SIZE_IN_BYTES)
 {}
@@ -1992,6 +2052,7 @@ field_kind_based_operations::field_kind_based_operations(
   std::function<int()> kind_size_in_byte_func)
   : kind_size_in_byte_func(std::move(kind_size_in_byte_func))
 {}
+
 field_kind_based_operations
 field_operations::get(field_kind kind)
 {
