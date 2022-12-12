@@ -51,7 +51,12 @@ operator==(const field_descriptor& x, const field_descriptor& y)
 std::ostream&
 operator<<(std::ostream& os, const field_descriptor& fd)
 {
-    return os << fd.kind;
+    return os << "FieldDescriptor{"
+              << "kind=" << fd.kind
+              << ", index=" << fd.index
+              << ", offset=" << fd.offset
+              << ", bitOffset=" << fd.bit_offset
+              << '}';
 }
 
 } // namespace pimpl
