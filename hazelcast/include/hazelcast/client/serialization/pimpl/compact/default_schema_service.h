@@ -47,6 +47,8 @@ public:
     static constexpr const char* MAX_PUT_RETRY_COUNT_DEFAULT = "100";
 
     default_schema_service(spi::ClientContext&);
+    default_schema_service(const default_schema_service&) = delete;
+    default_schema_service& operator=(const default_schema_service&) = delete;
 
     /**
      * Gets the schema with the given id either by
@@ -76,7 +78,6 @@ private:
     int retry_pause_millis_;
     int max_put_retry_count_;
     spi::ClientContext& context_;
-    logger& logger_;
     util::SynchronizedMap<int64_t, schema> replicateds_;
 };
 

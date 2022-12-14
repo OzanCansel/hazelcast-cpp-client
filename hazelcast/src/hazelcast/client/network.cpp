@@ -88,6 +88,7 @@ ClientConnectionManagerImpl::ClientConnectionManagerImpl(
   , cluster_id_(boost::uuids::nil_uuid())
   , client_state_(client_state::INITIAL)
   , connect_to_cluster_task_submitted_(false)
+  , established_initial_cluster_connection(false)
   , use_public_address_(
       address_provider_->is_default_provider() &&
       client.get_client_config().get_network_config().use_public_address())
@@ -861,7 +862,7 @@ ClientConnectionManagerImpl::on_authenticated(
             }
             else {
                 established_initial_cluster_connection = true;
-                client_state_ = client_state::CONNECTED_TO_CLUSTER;
+                client_state_ = client_state::INITIALIZED_ON_CLUSTER;
 
                 fire_life_cycle_event(
                 lifecycle_event::lifecycle_state::CLIENT_CONNECTED);

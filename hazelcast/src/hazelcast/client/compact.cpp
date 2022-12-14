@@ -1872,7 +1872,6 @@ default_schema_service::default_schema_service(spi::ClientContext& context)
   , max_put_retry_count_{ context.get_client_properties().get_integer(
       client_property{ MAX_PUT_RETRY_COUNT, MAX_PUT_RETRY_COUNT_DEFAULT }) }
   , context_{ context }
-  , logger_ {context.get_logger()}
 {
 }
 
@@ -1991,9 +1990,10 @@ default_schema_service::replicate_all_schemas()
     using level = hazelcast::logger::level;
     using namespace protocol::codec;
 
+    auto logger = context_.get_logger();
     if (replicateds_.empty()){
-        if (logger_.enabled(level::finest)){
-            logger_.log(level::finest, "There is no schema to send to the cluster.");
+        if (logger.enabled(level::finest)){
+            logger.log(level::finest, "There is no schema to send to the cluster.");
         }
 
         return;
@@ -2013,8 +2013,8 @@ default_schema_service::replicate_all_schemas()
         }
     );
 
-    if (logger_.enabled(level::finest)){
-        logger_.log(
+    if (logger.enabled(level::finest)){
+        logger.log(
             level::finest,
             (
                 boost::format("Sending schemas to the cluster %1%") % all_schemas
@@ -2028,7 +2028,7 @@ default_schema_service::replicate_all_schemas()
         context_, message, SERVICE_NAME
     );
 
-    invocation->invoke().get();
+    invocation->invoke_urgent().get();
 }
 
 std::ostream&

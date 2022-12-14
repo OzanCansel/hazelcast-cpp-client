@@ -163,7 +163,7 @@ private:
     lifecycle_service& lifecycle_service_;
     ClientInvocationServiceImpl& invocation_service_;
     std::shared_ptr<ClientExecutionServiceImpl> execution_service_;
-    serialization::pimpl::default_schema_service schema_service_;
+    serialization::pimpl::default_schema_service& schema_service_;
     boost::atomic_shared_ptr<std::shared_ptr<protocol::ClientMessage>>
       client_message_;
     std::shared_ptr<sequence::CallIdSequence> call_id_sequence_;

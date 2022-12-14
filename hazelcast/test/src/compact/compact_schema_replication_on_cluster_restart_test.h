@@ -34,23 +34,24 @@ namespace client {
 namespace test {
 namespace compact {
 
-class CompactSchemaReplicationOnWrite : public compact_test_base
+class CompactSchemaReplicationOnClusterRestart : public compact_test_base
 {};
 
-TEST_F(CompactSchemaReplicationOnWrite, imap_put)
+TEST_F(CompactSchemaReplicationOnClusterRestart, on_cluster_restart)
 {
     auto schema_parent = get_schema<a_type>();
     auto schema_child = get_schema<nested_type>();
 
-    ASSERT_EQ(check_schema_on_backend(schema_parent), false);
-    ASSERT_EQ(check_schema_on_backend(schema_child), false);
-
     auto map = client.get_map(random_string()).get();
 
-    map->put(random_string(), a_type{}).get();
+    map->put(random_string(), a_type {}).get();
 
-    ASSERT_EQ(check_schema_on_backend(schema_parent), true);
-    ASSERT_EQ(check_schema_on_backend(schema_child), true);
+    member_.shutdown();
+
+    HazelcastServer another_member{factory_};
+
+    ASSERT_TRUE_EVENTUALLY(check_schema_on_backend(schema_parent) &&
+                           check_schema_on_backend(schema_child));
 }
 
 } // namespace compact

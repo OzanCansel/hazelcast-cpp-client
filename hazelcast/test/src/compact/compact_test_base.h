@@ -69,6 +69,35 @@ protected:
         return serialization::pimpl::schema_of<T>::schema_v;
     }
 
+    bool check_schema_on_backend(const schema_t& schema)
+    {
+        Response response;
+
+        remote_controller_client().executeOnController(
+          response,
+          factory_.get_cluster_id(),
+          (boost::format(
+             R"(
+                        var schemas = instance_0.getOriginal().node.getSchemaService().getAllSchemas();
+                        var iterator = schemas.iterator();
+
+                        var exist = false;
+                        while(iterator.hasNext()){
+                            var schema = iterator.next();
+
+                            if (schema.getSchemaId() == "%1%")
+                                exist = true;
+                        }
+
+                        result = "" + exist;
+                    )") %
+           schema.schema_id())
+            .str(),
+          Lang::JAVASCRIPT);
+
+        return response.result == "true";
+    }
+
     HazelcastServerFactory factory_;
     HazelcastServer member_;
     hazelcast_client client;
