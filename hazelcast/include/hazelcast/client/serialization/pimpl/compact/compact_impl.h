@@ -571,6 +571,47 @@ template<typename T>
 const schema schema_of<T>::schema_v = schema_of<T>::build_schema();
 
 template<typename T>
+schema build_schema(const T& object)
+{
+    schema_writer schema_writer(hz_serializer<T>::type_name());
+    serialization::compact_writer writer =
+        create_compact_writer(&schema_writer);
+    serialization::hz_serializer<T>::write(object, writer);
+    return std::move(schema_writer).build();
+}
+
+template<typename T>
+class class_to_schema
+{
+public:
+
+    static const boost::optional<schema>& get()
+    {
+        std::lock_guard<std::mutex> guard{ mtx_ };
+
+        return value_;
+    }
+
+    static void set(const boost::optional<schema>& schema)
+    {
+        std::lock_guard<std::mutex> guard { mtx_ };
+
+        value_ = schema;
+    }
+
+private:
+
+    static std::mutex mtx_;
+    static boost::optional<schema> value_;
+};
+
+template<typename T>
+boost::optional<schema> class_to_schema<T>::value_ = boost::none;
+
+template<typename T>
+std::mutex class_to_schema<T>::mtx_;
+
+template<typename T>
 T inline compact_stream_serializer::read(object_data_input& in)
 {
     int64_t schema_id = in.read<int64_t>();
@@ -600,14 +641,18 @@ template<typename T>
 void inline compact_stream_serializer::write(const T& object,
                                              object_data_output& out)
 {
-    const auto& schema_v = schema_of<T>::schema_v;
+    const boost::optional<schema>& schema_v = class_to_schema<T>::get();
 
-    if (!schema_service.is_schema_replicated(schema_v)) {
-        out.schemas_will_be_replicated_.push_back(schema_v);
+    if (!schema_v.has_value()) {
+        class_to_schema<T>::set(build_schema(object));
     }
 
-    out.write<int64_t>(schema_v.schema_id());
-    default_compact_writer default_writer(*this, out, schema_v);
+    if (!schema_service.is_schema_replicated(*schema_v)) {
+        out.schemas_will_be_replicated_.push_back(*schema_v);
+    }
+
+    out.write<int64_t>(schema_v->schema_id());
+    default_compact_writer default_writer(*this, out, *schema_v);
     compact_writer writer = create_compact_writer(&default_writer);
     hz_serializer<T>::write(object, writer);
     default_writer.end();

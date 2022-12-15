@@ -35,38 +35,7 @@ namespace test {
 namespace compact {
 
 class CompactSchemaReplicationOnWrite : public compact_test_base
-{
-protected:
-
-    bool check_schema_on_backend(const schema_t& schema)
-    {
-        Response response;
-
-        remote_controller_client().executeOnController(
-          response,
-          factory_.get_cluster_id(),
-          (boost::format(
-             R"(
-                        var schemas = instance_0.getOriginal().node.getSchemaService().getAllSchemas();
-                        var iterator = schemas.iterator();
-
-                        var exist = false;
-                        while(iterator.hasNext()){
-                            var schema = iterator.next();
-
-                            if (schema.getSchemaId() == "%1%")
-                                exist = true;
-                        }
-
-                        result = "" + exist;
-                    )") %
-           schema.schema_id())
-            .str(),
-          Lang::JAVASCRIPT);
-
-        return response.result == "true";
-    }
-};
+{};
 
 TEST_F(CompactSchemaReplicationOnWrite, imap_put)
 {
