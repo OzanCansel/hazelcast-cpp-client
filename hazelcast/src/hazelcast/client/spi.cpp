@@ -1428,42 +1428,20 @@ ClientInvocation::invoke_urgent()
     assert(client_message_.load());
     urgent_ = true;
 
-    auto actual_work = [this]() {
-        // for back pressure
-        call_id_sequence_->force_next();
-        invoke_on_selection();
-        if (!lifecycle_service_.is_running()) {
-            return invocation_promise_.get_future().then(
-              [](boost::future<protocol::ClientMessage> f) { return f.get(); });
-        }
-        auto id_seq = call_id_sequence_;
+    // for back pressure
+    call_id_sequence_->force_next();
+    invoke_on_selection();
+    if (!lifecycle_service_.is_running()) {
         return invocation_promise_.get_future().then(
-          execution_service_->get_user_executor(),
-          [=](boost::future<protocol::ClientMessage> f) {
-              id_seq->complete();
-              return f.get();
-          });
-    };
-
-    const auto& schemas =
-      (*(client_message_.load()))->schemas_will_be_replicated();
-
-    if (!schemas.empty()) {
-        auto self = shared_from_this();
-
-        return replicate_schemas(schemas)
-          .then(
-            [this, actual_work, self](
-              boost::future<boost::csbl::vector<boost::future<void>>> replications) {
-                for (auto& replication : replications.get())
-                    replication.get();
-
-                return actual_work();
-            })
-          .unwrap();
+            [](boost::future<protocol::ClientMessage> f) { return f.get(); });
     }
-
-    return actual_work();
+    auto id_seq = call_id_sequence_;
+    return invocation_promise_.get_future().then(
+        execution_service_->get_user_executor(),
+        [=](boost::future<protocol::ClientMessage> f) {
+            id_seq->complete();
+            return f.get();
+        });
 }
 
 boost::future<boost::csbl::vector<boost::future<void>>>
