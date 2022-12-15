@@ -71,6 +71,11 @@ public:
     */
     void replicate_all_schemas();
 
+    /**
+     * Check whether any schemas exist in cache
+    */
+   bool has_any_schemas() const;
+
 private:
 
     boost::future<void> replicate_schema_attempt(schema, int attempts = 0);

@@ -2031,6 +2031,12 @@ default_schema_service::replicate_all_schemas()
     invocation->invoke_urgent().get();
 }
 
+bool
+default_schema_service::has_any_schemas() const
+{
+    return replicateds_.size();
+}
+
 std::ostream&
 operator<<(std::ostream& os, const std::vector<schema>& schemas)
 {

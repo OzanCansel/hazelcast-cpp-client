@@ -807,6 +807,38 @@ ClientInvocationServiceImpl::check_invocation_allowed()
     client_.get_connection_manager().check_invocation_allowed();
 }
 
+void
+ClientInvocationServiceImpl::check_urgent_invocation_allowed(const ClientInvocation& invocation)
+{
+    if (client_.get_connection_manager().client_initialized_on_cluster()){
+        // If the client is initialized on the cluster, that means we
+        // have sent all the schemas to the cluster, even if we are
+        // reconnected to it
+        return;
+    }
+
+    if (!client_.get_hazelcast_client_implementation()->should_check_urgent_invocations()){
+        // If there were no Compact schemas to begin with, we don't need
+        // to perform the check below. If the client didn't send a Compact
+        // schema up until this point, the retries or listener registrations
+        // could not send a schema, because if they were, we wouldn't hit
+        // this line.
+        return;
+    }
+
+    // We are not yet initialized on cluster, so the Compact schemas might
+    // not be sent yet. This message contains some serialized classes,
+    // and it is possible that it can also contain Compact serialized data.
+    // In that case, allowing this invocation to go through now could
+    // violate the invariant that the schema must come to cluster before
+    // the data. We will retry this invocation and wait until the client
+    // is initialized on the cluster, which means schemas are replicated
+    // in the cluster.
+    if (invocation.get_client_message()->contains_serialized_data_in_request()){
+        throw exception::invocation_might_contain_compact_data {invocation};
+    }
+}
+
 bool
 ClientInvocationServiceImpl::invoke(
   std::shared_ptr<ClientInvocation> invocation)
@@ -1428,42 +1460,20 @@ ClientInvocation::invoke_urgent()
     assert(client_message_.load());
     urgent_ = true;
 
-    auto actual_work = [this]() {
-        // for back pressure
-        call_id_sequence_->force_next();
-        invoke_on_selection();
-        if (!lifecycle_service_.is_running()) {
-            return invocation_promise_.get_future().then(
-              [](boost::future<protocol::ClientMessage> f) { return f.get(); });
-        }
-        auto id_seq = call_id_sequence_;
+    // for back pressure
+    call_id_sequence_->force_next();
+    invoke_on_selection();
+    if (!lifecycle_service_.is_running()) {
         return invocation_promise_.get_future().then(
-          execution_service_->get_user_executor(),
-          [=](boost::future<protocol::ClientMessage> f) {
-              id_seq->complete();
-              return f.get();
-          });
-    };
-
-    const auto& schemas =
-      (*(client_message_.load()))->schemas_will_be_replicated();
-
-    if (!schemas.empty()) {
-        auto self = shared_from_this();
-
-        return replicate_schemas(schemas)
-          .then(
-            [this, actual_work, self](
-              boost::future<boost::csbl::vector<boost::future<void>>> replications) {
-                for (auto& replication : replications.get())
-                    replication.get();
-
-                return actual_work();
-            })
-          .unwrap();
+            [](boost::future<protocol::ClientMessage> f) { return f.get(); });
     }
-
-    return actual_work();
+    auto id_seq = call_id_sequence_;
+    return invocation_promise_.get_future().then(
+        execution_service_->get_user_executor(),
+        [=](boost::future<protocol::ClientMessage> f) {
+            id_seq->complete();
+            return f.get();
+        });
 }
 
 boost::future<boost::csbl::vector<boost::future<void>>>
@@ -1491,7 +1501,10 @@ ClientInvocation::invoke_on_selection()
 {
     try {
         invoke_count_++;
-        if (!urgent_) {
+        if (urgent_) {
+            invocation_service_.check_urgent_invocation_allowed(*this);
+        }
+        else {
             invocation_service_.check_invocation_allowed();
         }
 

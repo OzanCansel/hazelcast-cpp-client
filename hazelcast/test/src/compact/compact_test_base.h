@@ -109,6 +109,7 @@ private:
         client_config cfg;
 
         cfg.set_cluster_name("compact-dev");
+        cfg.get_logger_config().level(logger::level::all);
 
         return cfg;
     }
