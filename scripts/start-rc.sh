@@ -1,5 +1,10 @@
 #!/bin/bash
 
+function version_greater_equal()
+{
+    printf '%s\n%s\n' "$2" "$1" | sort --check=quiet --version-sort
+}
+
 function cleanup {
     echo "cleanup is being performed."
     if [ "x${rcPid}" != "x" ]
@@ -55,14 +60,24 @@ else
     fi
 fi
 
-if [ -f "hazelcast-sql-${HZ_VERSION}.jar" ]; then
-    echo "hazelcast-sql-${HZ_VERSION}.jar already exists, not downloading from maven."
+version_greater_equal ${HZ_VERSION} 4.2.0
+
+if [[ $? -eq "0" ]]; then
+    INCLUDE_SQL="1"
 else
-    echo "Downloading: hazelcast-sql-${HZ_VERSION}.jar com.hazelcast:hazelcast-sql:${HZ_VERSION}:jar"
-    mvn -q dependency:get -Dtransitive=false -DrepoUrl=${SNAPSHOT_REPO} -Dartifact=com.hazelcast:hazelcast-sql:${HZ_VERSION}:jar -Ddest=hazelcast-sql-${HZ_VERSION}.jar
-    if [ $? -ne 0 ]; then
-        echo "Failed download hazelcast-sql-${HZ_VERSION}.jar com.hazelcast:hazelcast-sql:${HZ_VERSION}:jar"
-        exit 1
+    INCLUDE_SQL="0"
+fi
+
+if [[ ${INCLUDE_SQL} -eq "1" ]]; then
+    if [ -f "hazelcast-sql-${HZ_VERSION}.jar" ]; then
+        echo "hazelcast-sql-${HZ_VERSION}.jar already exists, not downloading from maven."
+    else
+        echo "Downloading: hazelcast-sql-${HZ_VERSION}.jar com.hazelcast:hazelcast-sql:${HZ_VERSION}:jar"
+        mvn -q dependency:get -Dtransitive=false -DrepoUrl=${SNAPSHOT_REPO} -Dartifact=com.hazelcast:hazelcast-sql:${HZ_VERSION}:jar -Ddest=hazelcast-sql-${HZ_VERSION}.jar
+        if [ $? -ne 0 ]; then
+            echo "Failed download hazelcast-sql-${HZ_VERSION}.jar com.hazelcast:hazelcast-sql:${HZ_VERSION}:jar"
+            exit 1
+        fi
     fi
 fi
 
@@ -76,11 +91,37 @@ else
         exit 1
     fi
 fi
+
+if [ -f "hazelcast-enterprise-${HAZELCAST_ENTERPRISE_VERSION}-tests.jar" ]; then
+echo "hazelcast-enterprise-tests.jar already exists, not downloading."
+else
+    echo "Downloading: hazelcast enterprise test jar ${HAZELCAST_ENTERPRISE_VERSION}"
+    git clone git@github.com:hazelcast/private-test-artifacts.git
+
+    if [ $? -eq 0 ]; then
+        cd private-test-artifacts
+        git checkout data
+        cp certs.jar ../hazelcast-enterprise-${HAZELCAST_ENTERPRISE_VERSION}-tests.jar
+        cd ..
+        rm -rf private-test-artifacts
+    else
+        echo "Failed download hazelcast enterprise test jar hazelcast-enterprise-${HAZELCAST_ENTERPRISE_VERSION}-tests.jar"
+        echo "Make sure you have access permission to 'github.com/hazelcast/private-test-artifacts repo'"
+        echo "Make sure that you added you ssh-key to your github account."
+
+        exit 1
+    fi
+fi
+
 CLASSPATH="\
 hazelcast-remote-controller-${HAZELCAST_RC_VERSION}.jar:\
-hazelcast-sql-${HZ_VERSION}.jar:\
 hazelcast-enterprise-${HAZELCAST_ENTERPRISE_VERSION}.jar:\
 hazelcast-${HAZELCAST_TEST_VERSION}-tests.jar"
+
+# hazelcast-enterprise-${HAZELCAST_ENTERPRISE_VERSION}-tests.jar:\
+if [[ ${INCLUDE_SQL} -eq "1" ]]; then
+    CLASSPATH=$CLASSPATH:\:hazelcast-sql-${HZ_VERSION}.jar
+fi
 
 # necessary arguments for Java 9+
 JAVA_MAJOR_VERSION=$(java -version 2>&1 | head -n 1 | awk -F '"' '{print $2}' | awk -F '.' '{print $1}')
