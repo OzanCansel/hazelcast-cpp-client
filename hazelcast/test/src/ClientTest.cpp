@@ -105,7 +105,7 @@ ClientTest::get_ssl_file_path()
 std::string
 ClientTest::random_map_name()
 {
-    return random_string();
+    return "test_" + boost::replace_all_copy(random_string(), "-", "_");
 }
 
 boost::uuids::uuid
