@@ -2069,6 +2069,7 @@ field_kind_based_operations::field_kind_based_operations(
   std::function<int()> kind_size_in_byte_func)
   : kind_size_in_byte_func(std::move(kind_size_in_byte_func))
 {}
+
 field_kind_based_operations
 field_operations::get(field_kind kind)
 {

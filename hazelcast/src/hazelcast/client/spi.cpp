@@ -808,18 +808,28 @@ ClientInvocationServiceImpl::check_invocation_allowed()
 }
 
 void
+<<<<<<< HEAD
 ClientInvocationServiceImpl::check_urgent_invocation_allowed(
   const ClientInvocation& invocation)
 {
     if (client_.get_connection_manager().client_initialized_on_cluster()) {
+=======
+ClientInvocationServiceImpl::check_urgent_invocation_allowed(const ClientInvocation& invocation)
+{
+    if (client_.get_connection_manager().client_initialized_on_cluster()){
+>>>>>>> 90b86bec5 (Schema distribution on cluster-restart is implemented.)
         // If the client is initialized on the cluster, that means we
         // have sent all the schemas to the cluster, even if we are
         // reconnected to it
         return;
     }
 
+<<<<<<< HEAD
     if (!client_.get_hazelcast_client_implementation()
            ->should_check_urgent_invocations()) {
+=======
+    if (!client_.get_hazelcast_client_implementation()->should_check_urgent_invocations()){
+>>>>>>> 90b86bec5 (Schema distribution on cluster-restart is implemented.)
         // If there were no Compact schemas to begin with, we don't need
         // to perform the check below. If the client didn't send a Compact
         // schema up until this point, the retries or listener registrations
@@ -836,12 +846,17 @@ ClientInvocationServiceImpl::check_urgent_invocation_allowed(
     // the data. We will retry this invocation and wait until the client
     // is initialized on the cluster, which means schemas are replicated
     // in the cluster.
+<<<<<<< HEAD
     if (invocation.get_client_message()
           ->contains_serialized_data_in_request()) {
         throw exception::invocation_might_contain_compact_data{
             "ClientInvocationServiceImpl::check_urgent_invocation_allowed",
             invocation
         };
+=======
+    if (invocation.get_client_message()->contains_serialized_data_in_request()){
+        throw exception::invocation_might_contain_compact_data {invocation};
+>>>>>>> 90b86bec5 (Schema distribution on cluster-restart is implemented.)
     }
 }
 

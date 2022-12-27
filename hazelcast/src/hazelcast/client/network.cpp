@@ -596,7 +596,17 @@ ClientConnectionManagerImpl::connect_to_cluster()
     if (async_start_) {
         submit_connect_to_cluster_task();
     } else {
-        do_connect_to_cluster();
+        if (do_connect_to_cluster()){
+            return;
+        }
+
+        {
+            std::lock_guard<std::recursive_mutex> guard {client_state_mutex_};
+
+            if (active_connections_.empty()){
+                client_state_ = client_state::SWITCHING_CLUSTER;
+            }
+        }
     }
 }
 
