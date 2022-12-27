@@ -5814,6 +5814,23 @@ send_schema_response_decode(ClientMessage& m)
     return m.get<std::vector<boost::uuids::uuid>>();
 }
 
+ClientMessage
+client_sendallschemas_encode(const std::vector<serialization::pimpl::schema> &schemas)
+{
+    size_t initial_frame_size = ClientMessage::REQUEST_HEADER_LEN;
+    ClientMessage msg(initial_frame_size);
+    msg.set_retryable(true);
+    msg.set_operation_name("client.sendallschemas");
+
+    msg.set_message_type(static_cast<int32_t>(5376));
+    msg.set_partition_id(-1);
+
+    msg.set(schemas, true);
+
+    return msg;
+}
+
+
 } // namespace codec
 } // namespace protocol
 } // namespace client

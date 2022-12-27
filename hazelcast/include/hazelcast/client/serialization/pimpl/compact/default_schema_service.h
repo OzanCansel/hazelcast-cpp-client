@@ -21,6 +21,7 @@
 #include "hazelcast/util/export.h"
 #include "hazelcast/util/SynchronizedMap.h"
 #include "hazelcast/client/serialization/pimpl/compact/schema.h"
+#include "hazelcast/logger.h"
 
 namespace hazelcast {
 namespace client {
@@ -28,7 +29,6 @@ namespace client {
 namespace spi {
 class ClientContext;
 }
-
 namespace serialization {
 namespace pimpl {
 
@@ -47,6 +47,8 @@ public:
     static constexpr const char* MAX_PUT_RETRY_COUNT_DEFAULT = "100";
 
     default_schema_service(spi::ClientContext&);
+    default_schema_service(const default_schema_service&) = delete;
+    default_schema_service& operator=(const default_schema_service&) = delete;
 
     /**
      * Gets the schema with the given id either by
@@ -64,7 +66,18 @@ public:
 
     bool is_schema_replicated(const schema&);
 
+    /**
+     * Replicates all schemas on cluster
+    */
+    void replicate_all_schemas();
+
+    /**
+     * Check whether any schemas exist in cache
+    */
+   bool has_any_schemas() const;
+
 private:
+
     boost::future<void> replicate_schema_attempt(schema, int attempts = 0);
 
     int retry_pause_millis_;

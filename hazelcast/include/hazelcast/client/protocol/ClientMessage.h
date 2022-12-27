@@ -1098,6 +1098,10 @@ public:
             if (is_final) {
                 h->flags |= IS_FINAL_FLAG;
             }
+
+            if (std::is_same<T, serialization::pimpl::data>::value) {
+              contains_serialized_data_in_request_ = true;
+            }
         } else {
             set(*value, is_final);
         }
@@ -1215,6 +1219,8 @@ public:
         copy(begin(value.schemas_will_be_replicated()),
              end(value.schemas_will_be_replicated()),
              back_inserter(schemas_will_be_replicated_));
+
+        contains_serialized_data_in_request_ = true;
     }
 
     inline void set(const serialization::pimpl::data* value,
@@ -1397,6 +1403,8 @@ public:
 
     void drop_fragmentation_frame();
 
+    bool contains_serialized_data_in_request() const;
+
     friend std::ostream HAZELCAST_API& operator<<(std::ostream& os,
                                                   const ClientMessage& message);
 
@@ -1494,6 +1502,7 @@ private:
     std::vector<std::vector<byte>> data_buffer_;
     size_t buffer_index_{ 0 };
     size_t offset_{ 0 };
+    bool contains_serialized_data_in_request_;
     std::vector<serialization::pimpl::schema> schemas_will_be_replicated_;
 };
 
