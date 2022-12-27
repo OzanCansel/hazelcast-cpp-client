@@ -106,8 +106,8 @@ random_string()
     ASSERT_EQ(boost::cv_status::no_timeout,                                    \
               (const_cast<boost::latch&>(latch1))                              \
                 .wait_for(boost::chrono::seconds(120)))
-#define ASSERT_OPEN_EVENTUALLY_ASYNC(latch1)                                   \
-    ASSERT_EQ(std::cv_status::no_timeout,                                      \
+#define EXPECT_OPEN_EVENTUALLY_ASYNC(latch1)                                   \
+    EXPECT_EQ(std::cv_status::no_timeout,                                      \
               (latch1->wait_for(std::chrono::seconds(120)).get()))
 
 #define assertSizeEventually(expectedSize, container)                          \
@@ -121,3 +121,13 @@ random_string()
           ((container)->size().get()),                                         \
           timeoutSeconds);                                                     \
     } while (0)
+
+#define EXPECT_THROW_FN(statement, expected_exception, fn)                     \
+    try {                                                                      \
+        statement;                                                             \
+        FAIL();                                                                \
+    } catch (const expected_exception& e) {                                    \
+        fn(e);                                                                 \
+    } catch (...) {                                                            \
+        FAIL();                                                                \
+    }

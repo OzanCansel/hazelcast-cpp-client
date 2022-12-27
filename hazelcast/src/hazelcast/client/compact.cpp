@@ -1978,10 +1978,23 @@ default_schema_service::is_schema_replicated(const schema& s)
     return bool(replicateds_.get(s.schema_id()));
 }
 
-compact_stream_serializer::compact_stream_serializer(
-  default_schema_service& service)
-  : schema_service{ service }
+bool
+default_schema_service::has_any_schemas() const
 {
+    return replicateds_.size();
+}
+
+std::ostream&
+operator<<(std::ostream& os, const std::vector<schema>& schemas)
+{
+    os << "Map {";
+
+    for (const auto& s : schemas)
+        os << s << " , ";
+
+    os << "}";
+
+    return os;
 }
 
 void
@@ -2031,23 +2044,10 @@ default_schema_service::replicate_all_schemas()
     invocation->invoke_urgent().get();
 }
 
-bool
-default_schema_service::has_any_schemas() const
+compact_stream_serializer::compact_stream_serializer(
+  default_schema_service& service)
+  : schema_service{ service }
 {
-    return replicateds_.size();
-}
-
-std::ostream&
-operator<<(std::ostream& os, const std::vector<schema>& schemas)
-{
-    os << "Map {";
-
-    for (const auto& s : schemas)
-        os << s << " , ";
-
-    os << "}";
-
-    return os;
 }
 
 field_kind_based_operations::field_kind_based_operations()

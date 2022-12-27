@@ -63,12 +63,6 @@ protected:
         ASSERT_NO_THROW(context.get_schema_service().replicate_schema(schema).get());
     }
 
-    template<typename T>
-    schema_t get_schema()
-    {
-        return serialization::pimpl::schema_of<T>::schema_v;
-    }
-
     bool check_schema_on_backend(const schema_t& schema)
     {
         Response response;
@@ -98,6 +92,13 @@ protected:
         return response.result == "true";
     }
 
+    template<typename T>
+    schema_t get_schema()
+    {
+        T instance;
+        return serialization::pimpl::build_schema(instance);
+    }
+
     HazelcastServerFactory factory_;
     HazelcastServer member_;
     hazelcast_client client;
@@ -109,7 +110,6 @@ private:
         client_config cfg;
 
         cfg.set_cluster_name("compact-dev");
-        cfg.get_logger_config().level(logger::level::all);
 
         return cfg;
     }

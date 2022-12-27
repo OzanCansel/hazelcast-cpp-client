@@ -19,3 +19,4 @@
 #include "compact/compact_schema_replication_on_write_test.h"
 #include "compact/compact_schema_replication_on_cluster_restart_test.h"
 #include "compact/compact_schema_validation_test.h"
+#include "compact/compact_schema_replication_stress_test.h"

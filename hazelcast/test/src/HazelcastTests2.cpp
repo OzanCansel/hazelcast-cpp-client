@@ -1511,7 +1511,6 @@ TEST_F(ClientSerializationTest, testWriteObjectWithIdentifiedDataSerializable)
     serialization::pimpl::SerializationService ss(serializationConfig,
                                                   null_schema_service());
 
-
     ObjectCarryingPortable<TestDataSerializable> objectCarryingPortable{
         TestDataSerializable{ 2, 'c' }
     };
@@ -1560,7 +1559,6 @@ TEST_F(ClientSerializationTest, testNullData)
     serialization_config serializationConfig;
     serialization::pimpl::SerializationService ss(serializationConfig,
                                                   null_schema_service());
-
     auto ptr = ss.to_object<int32_t>(data);
     ASSERT_FALSE(ptr.has_value());
 }

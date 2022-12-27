@@ -16,24 +16,41 @@
 
 #pragma once
 
-#include <string>
-#include <hazelcast/client/member.h>
-
-#include "cpp-controller/RemoteController.h"
-
 namespace hazelcast {
 namespace client {
 namespace test {
+namespace compact {
 
-std::string
-remote_controller_address();
+template<int Idx>
+struct stress_type
+{};
 
-remote::RemoteControllerClient&
-remote_controller_client();
+}
+}
+}
+}
 
-member::version
-cluster_version();
+namespace hazelcast {
+namespace client {
+namespace serialization {
 
-} // namespace test
-} // namespace client
-} // namespace hazelcast
+template<int Idx>
+struct hz_serializer<test::compact::stress_type<Idx>> : compact_serializer
+{
+    static std::string type_name() { return "stress_type_" + std::to_string(Idx); }
+
+    static void write(const test::compact::stress_type<Idx>&,
+               compact_writer& writer)
+    {
+        writer.write_int32("field_" + std::to_string(Idx), Idx);
+    }
+
+    static test::compact::stress_type<Idx> read(compact_reader& reader)
+    {
+        return test::compact::stress_type<Idx>{};
+    }
+};
+
+}
+}
+}

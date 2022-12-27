@@ -90,7 +90,7 @@ public:
         bool operator>=(const version& rhs) const;
 
         friend std::ostream HAZELCAST_API &
-        operator<<(std::ostream& os,const version& version);
+        operator<<(std::ostream& os, const version& version);
     };
 
     member();

@@ -1935,7 +1935,7 @@ public:
         return data;
     }
 
-    const byte get_version() const;
+    byte get_version() const;
 
     object_type get_object_type(const data* data);
 
