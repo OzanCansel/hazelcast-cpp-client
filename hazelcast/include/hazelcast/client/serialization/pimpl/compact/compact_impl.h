@@ -609,7 +609,7 @@ T inline compact_stream_serializer::read(object_data_input& in)
           create_compact_reader(*this, in, *local_schema);
         return hz_serializer<T>::read(reader);
     }
-    // This path will run only in schema evolution case
+
     auto schema = schema_service.get(schema_id);
     if (schema.type_name() != hz_serializer<T>::type_name()) {
         auto exception = exception::hazelcast_serialization{
