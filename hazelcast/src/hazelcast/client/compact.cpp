@@ -1880,12 +1880,35 @@ default_schema_service::get(int64_t schemaId)
 {
     auto ptr = replicateds_.get(schemaId);
 
-    if (!ptr) {
+    if (ptr) {
+        return *ptr;
+    }
+
+    auto logger = context_.get_logger();
+    if (logger.enabled(logger::level::finest)) {
+        logger.log(
+          logger::level::finest,
+          boost::str(boost::format("Could not find schema id %1% locally, will "
+                                   "search on the cluster %1%") %
+                     schemaId));
+    }
+
+    using namespace protocol::codec;
+
+    auto message = client_fetchschema_encode(schemaId);
+
+    auto invocation =
+      spi::impl::ClientInvocation::create(context_, message, SERVICE_NAME);
+    auto response = invocation->invoke().get();
+
+    auto sch = response.get_nullable<schema>();
+
+    if (!sch) {
         throw exception::illegal_state{ "default_schema_service::get",
                                         "Schema doesn't exist for this type" };
     }
 
-    return *ptr;
+    return *sch;
 }
 
 boost::future<void>

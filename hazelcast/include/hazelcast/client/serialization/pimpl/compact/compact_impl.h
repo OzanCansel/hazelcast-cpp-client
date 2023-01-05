@@ -615,14 +615,14 @@ template<typename T>
 T inline compact_stream_serializer::read(object_data_input& in)
 {
     int64_t schema_id = in.read<int64_t>();
-    const auto& local_schema = schema_of<T>::schema_v;
-    // optimization to avoid hitting shared map in the schema_service,
-    // in the case incoming data's schema is same as the local schema
-    if (schema_id == local_schema.schema_id()) {
-        compact_reader reader = create_compact_reader(*this, in, local_schema);
+
+    const boost::optional<schema>& local_schema = class_to_schema<T>::get();
+
+    if (local_schema.has_value() && local_schema->schema_id() == schema_id) {
+        compact_reader reader = create_compact_reader(*this, in, *local_schema);
         return hz_serializer<T>::read(reader);
     }
-    // This path will run only in schema evolution case
+
     auto schema = schema_service.get(schema_id);
     if (schema.type_name() != hz_serializer<T>::type_name()) {
         auto exception = exception::hazelcast_serialization{
@@ -633,6 +633,7 @@ T inline compact_stream_serializer::read(object_data_input& in)
         };
         BOOST_THROW_EXCEPTION(exception);
     }
+
     compact_reader reader = create_compact_reader(*this, in, schema);
     return hz_serializer<T>::read(reader);
 }
