@@ -21,3 +21,4 @@
 #include "compact/compact_schema_validation_test.h"
 #include "compact/compact_schema_replication_stress_test.h"
 #include "compact/compact_schema_fetch_on_read.h"
+#include "compact/compact_read_write_integration_test.h"

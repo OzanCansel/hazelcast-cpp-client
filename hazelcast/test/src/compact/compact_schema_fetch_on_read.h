@@ -47,18 +47,19 @@ protected:
           factory_.get_cluster_id(),
           (boost::format(
              R"(
-                    var nested_type = com.hazelcast.nio.serialization.genericrecord.GenericRecordBuilder.compact("nested_type").setInt32("y", 101).build();
-                    var a_type = com.hazelcast.nio.serialization.genericrecord.GenericRecordBuilder.compact("a_type").setInt32("x", 100).setGenericRecord("nested", nested_type).build();
+                    var nested_type = com.hazelcast.nio.serialization.genericrecord.GenericRecordBuilder.compact("%1%").setInt32("y", 101).build();
+                    var a_type = com.hazelcast.nio.serialization.genericrecord.GenericRecordBuilder.compact("%2%").setInt32("x", 100).setGenericRecord("nested", nested_type).build();
 
-                    var map_name = "%1%";
-                    var key = "%2%";
+                    var map_name = "%3%";
+                    var key = "%4%";
                     var map = instance_0.getMap(map_name);
 
                     map.put(key, a_type);
 
                     result = "true";
                         )") %
-           map_name_ % key_)
+           serialization::hz_serializer<nested_type>::type_name() %
+           serialization::hz_serializer<a_type>::type_name() % map_name_ % key_)
             .str(),
           Lang::JAVASCRIPT);
 
@@ -111,11 +112,41 @@ TEST_F(CompactSchemaFetchOnRead, throw_exception_on_typename_mismatch)
 
     auto map = client.get_map(map_name_).get();
 
-    auto fn = [=](){
-        map->get<std::string, a_type>(key_).get();
-    };
+    auto fn = [=]() { map->get<std::string, a_type>(key_).get(); };
 
     EXPECT_THROW(fn(), exception::hazelcast_serialization);
+}
+
+TEST_F(CompactSchemaFetchOnRead, sql_read)
+{
+    put_record_with_rc();
+
+    std::string query =
+      (boost::format("CREATE MAPPING %1% ("
+                     "__key VARCHAR,"
+                     "x INT"
+                     ")"
+                     "TYPE IMap "
+                     "OPTIONS ("
+                     "'keyFormat' = 'varchar', "
+                     "'valueFormat' = 'compact', "
+                     "'valueCompactTypeName' = '%2%' "
+                     ")") %
+       map_name_ % serialization::hz_serializer<a_type>::type_name())
+        .str();
+
+    (void)client.get_sql().execute(query).get();
+
+    auto result =
+      client.get_sql()
+        .execute(str(boost::format("SELECT * FROM %1%") % map_name_))
+        .get();
+
+    auto page = result->iterator().next().get();
+
+    auto actual = page->rows().front().get_object<int>("x");
+    ASSERT_TRUE(actual.has_value());
+    EXPECT_EQ(actual.value(), 100);
 }
 
 } // namespace compact
