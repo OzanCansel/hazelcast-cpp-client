@@ -924,7 +924,6 @@ public:
 
         // skip begin frame
         skip_frame();
-        skip_frame();
 
         auto type_name = get<std::string>();
 
