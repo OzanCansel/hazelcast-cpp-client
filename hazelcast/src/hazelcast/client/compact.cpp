@@ -1901,6 +1901,7 @@ default_schema_service::get(int64_t schemaId)
       spi::impl::ClientInvocation::create(context_, message, SERVICE_NAME);
     auto response = invocation->invoke().get();
 
+    response.skip_frame();
     auto sch = response.get_nullable<schema>();
 
     if (!sch) {
