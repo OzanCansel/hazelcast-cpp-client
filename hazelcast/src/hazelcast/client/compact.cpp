@@ -99,7 +99,7 @@ operator<<(std::ostream& os, field_kind kind)
             os << "INT64";
             break;
         case field_kind::ARRAY_OF_INT64:
-            os << "ARRAY_OF_INT16";
+            os << "ARRAY_OF_INT64";
             break;
         case field_kind::FLOAT32:
             os << "FLOAT32";
