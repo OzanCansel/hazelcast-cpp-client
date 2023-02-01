@@ -16,6 +16,7 @@
 #pragma once
 
 #include "hazelcast/client/serialization/pimpl/compact/compact.h"
+#include "hazelcast/client/serialization/generic_record_builder.h"
 #include "hazelcast/util/finally.h"
 #include "hazelcast/util/IOUtil.h"
 #include <type_traits>
@@ -167,6 +168,15 @@ typename std::enable_if<
 compact_reader::read()
 {
     return compact_stream_serializer.template read<T>(object_data_input);
+}
+
+template<typename T>
+typename std::enable_if<
+    std::is_same<generic_record, T>::value,
+    typename boost::optional<T>>::type
+compact_reader::read()
+{
+    return compact_stream_serializer.read_generic_record(object_data_input);
 }
 
 template<typename T>
@@ -517,6 +527,15 @@ default_compact_writer::write(const T& value)
 }
 
 template<typename T>
+typename std::enable_if<
+    std::is_same<generic_record, T>::value,
+    void>::type
+default_compact_writer::write(const T& value)
+{
+    compact_stream_serializer_.write_generic_record(value, object_data_output_);
+}
+
+template<typename T>
 typename std::enable_if<std::is_same<std::vector<bool>, T>::value, void>::type
 default_compact_writer::write(const T& value)
 {
@@ -636,6 +655,51 @@ T inline compact_stream_serializer::read(object_data_input& in)
 
     compact_reader reader = create_compact_reader(*this, in, schema);
     return hz_serializer<T>::read(reader);
+}
+
+generic_record compact_stream_serializer::read_generic_record(object_data_input& in)
+{
+    int64_t schema_id = in.read<int64_t>();
+
+    auto sch = schema_service.get(schema_id);
+
+    compact_reader reader = create_compact_reader(*this, in, sch);
+    generic_record_builder builder {sch.type_name()};
+
+    for (const std::pair<std::string, field_descriptor>& p : sch.fields()) {
+        const std::string& field_name = p.first;
+        const field_descriptor& descriptor = p.second;
+        field_operations::get(descriptor.kind).read_generic_record_or_primitive(reader, builder, field_name);
+    }
+
+    return builder.build();
+}
+
+inline void compact_stream_serializer::write_generic_record(const generic_record& record,
+                                             object_data_output& out)
+{
+    const schema& s = record.get_schema();
+
+    if (!schema_service.is_schema_replicated(s)){
+        out.schemas_will_be_replicated_.push_back(s);
+    }
+
+    out.write<int64_t>(s.schema_id());
+    default_compact_writer default_writer(*this, out, s);
+
+    const auto& fields = s.fields();
+    for (std::pair<std::string, field_descriptor> pair : fields) {
+        const std::string& field = pair.first;
+        const field_descriptor& desc = pair.second;
+
+        field_operations::get(desc.kind).write_field_from_record_to_writer(
+            default_writer,
+            record,
+            field
+        );
+    }
+
+    default_writer.end();
 }
 
 template<typename T>

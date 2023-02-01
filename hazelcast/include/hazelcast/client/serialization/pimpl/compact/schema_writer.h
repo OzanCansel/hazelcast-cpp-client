@@ -14,13 +14,28 @@
  * limitations under the License.
  */
 
-#include "compact/compact_serialization_test.h"
-#include "compact/compact_nullable_primitive_interoperability_test.h"
-#include "compact/compact_schema_replication_on_write_test.h"
-#include "compact/compact_schema_replication_on_cluster_restart_test.h"
-#include "compact/compact_schema_validation_test.h"
-#include "compact/compact_schema_replication_stress_test.h"
-#include "compact/compact_schema_fetch_on_read.h"
-#include "compact/compact_read_write_integration_test.h"
-#include "compact/compact_generic_record_write_test.h"
-#include "compact/compact_mix.h"
+#pragma once
+
+#include "hazelcast/client/serialization/pimpl/compact/schema.h"
+
+namespace hazelcast {
+namespace client {
+namespace serialization {
+namespace pimpl {
+
+class HAZELCAST_API schema_writer
+{
+public:
+    explicit schema_writer(std::string type_name);
+    void add_field(std::string field_name, enum field_kind kind);
+    schema build() &&;
+
+private:
+    std::unordered_map<std::string, field_descriptor> field_definition_map;
+    std::string type_name;
+};
+
+}
+}
+}
+}
