@@ -34,6 +34,7 @@ namespace pimpl {
 class compact_stream_serializer;
 }
 
+namespace generic_record {
 struct generic_record_builder;
 
 class HAZELCAST_API generic_record
@@ -156,6 +157,7 @@ private:
     pimpl::schema schema_;
 };
 
+}
 }
 }
 }

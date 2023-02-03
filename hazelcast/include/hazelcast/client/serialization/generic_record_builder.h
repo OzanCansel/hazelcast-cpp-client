@@ -31,7 +31,7 @@
 namespace hazelcast {
 namespace client {
 namespace serialization {
-
+namespace generic_record {
 class HAZELCAST_API generic_record_builder
 {
 public:
@@ -107,6 +107,7 @@ private:
     pimpl::schema_writer writer_;
 };
 
+}
 }
 }
 }

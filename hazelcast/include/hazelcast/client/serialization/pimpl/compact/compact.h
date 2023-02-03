@@ -648,7 +648,7 @@ private:
     read();
     template<typename T>
     typename std::enable_if<
-      std::is_same<generic_record, T>::value,
+      std::is_same<generic_record::generic_record, T>::value,
       typename boost::optional<T>>::type
     read();
     template<typename T>
@@ -1339,7 +1339,7 @@ private:
 
     template<typename T>
     typename std::enable_if<
-      std::is_same<generic_record, T>::value,
+      std::is_same<generic_record::generic_record, T>::value,
       void>::type
     write(const T& value);
 
@@ -1386,12 +1386,12 @@ public:
     template<typename T>
     T read(object_data_input& in);
 
-    inline generic_record read_generic_record(object_data_input& in);
+    inline generic_record::generic_record read_generic_record(object_data_input& in);
 
     template<typename T>
     void write(const T& object, object_data_output& out);
 
-    void write_generic_record(const generic_record& record, object_data_output& out);
+    void write_generic_record(const generic_record::generic_record& record, object_data_output& out);
 
 private:
     default_schema_service& schema_service;
@@ -1400,8 +1400,8 @@ private:
 struct HAZELCAST_API field_kind_based_operations
 {
     using kind_size_in_bytes_fn = std::function<int()>;
-    using write_field_from_record_to_writer_fn = std::function<void(default_compact_writer&, const generic_record&, const std::string& field)>;
-    using read_generic_record_or_primitive_fn = std::function<void(compact_reader&, generic_record_builder&, const std::string& field)>;
+    using write_field_from_record_to_writer_fn = std::function<void(default_compact_writer&, const generic_record::generic_record&, const std::string& field)>;
+    using read_generic_record_or_primitive_fn = std::function<void(compact_reader&, generic_record::generic_record_builder&, const std::string& field)>;
 
     static constexpr int VARIABLE_SIZE = -1;
 

@@ -69,6 +69,7 @@ operator<<(std::ostream& os, const field_descriptor& fd)
 namespace hazelcast {
 namespace client {
 namespace serialization {
+namespace generic_record {
 
 generic_record_builder&
 generic_record_builder::set_string(std::string field_name, const char* cstr)
@@ -270,6 +271,8 @@ std::ostream& operator<<(std::ostream& os, const generic_record& rec)
 {
     // Not implemented
     return os;
+}
+
 }
 
 std::ostream&
@@ -2300,26 +2303,26 @@ field_operations::get(field_kind kind)
         case field_kind::BOOLEAN:
             return field_kind_based_operations{
                 []{ return 0; },
-                [](default_compact_writer& writer, const generic_record& record, const std::string& field){
+                [](default_compact_writer& writer, const generic_record::generic_record& record, const std::string& field){
                     writer.write_boolean(field, record.get_boolean(field));
                 },
-                [](compact_reader& reader, generic_record_builder& builder, const std::string& field){
+                [](compact_reader& reader, generic_record::generic_record_builder& builder, const std::string& field){
                     builder.set_boolean(field, reader.read_boolean(field));
                 }
             };
         case field_kind::INT8:
             return field_kind_based_operations{
                 []{ return 1; },
-                [](default_compact_writer&, const generic_record&, const std::string&){},
-                [](compact_reader& reader, generic_record_builder& builder, const std::string& field){
+                [](default_compact_writer&, const generic_record::generic_record&, const std::string&){},
+                [](compact_reader& reader, generic_record::generic_record_builder& builder, const std::string& field){
                     builder.set_boolean(field, reader.read_boolean(field));
                 }
             };
         case field_kind::INT16:
             return field_kind_based_operations{
                 []{ return Bits::SHORT_SIZE_IN_BYTES; },
-                [](default_compact_writer&, const generic_record&, const std::string&){},
-                [](compact_reader& reader, generic_record_builder& builder, const std::string& field){
+                [](default_compact_writer&, const generic_record::generic_record&, const std::string&){},
+                [](compact_reader& reader, generic_record::generic_record_builder& builder, const std::string& field){
                     builder.set_boolean(field, reader.read_boolean(field));
                 }
             };
@@ -2328,8 +2331,8 @@ field_operations::get(field_kind kind)
                 []{
                     return Bits::INT_SIZE_IN_BYTES;
                 },
-                [](default_compact_writer&, const generic_record&, const std::string&){},
-                [](compact_reader& reader, generic_record_builder& builder, const std::string& field){
+                [](default_compact_writer&, const generic_record::generic_record&, const std::string&){},
+                [](compact_reader& reader, generic_record::generic_record_builder& builder, const std::string& field){
                     builder.set_boolean(field, reader.read_boolean(field));
                 }
             };
@@ -2338,8 +2341,8 @@ field_operations::get(field_kind kind)
                 []{
                     return Bits::LONG_SIZE_IN_BYTES;
                 },
-                [](default_compact_writer&, const generic_record&, const std::string&){},
-                [](compact_reader& reader, generic_record_builder& builder, const std::string& field){
+                [](default_compact_writer&, const generic_record::generic_record&, const std::string&){},
+                [](compact_reader& reader, generic_record::generic_record_builder& builder, const std::string& field){
                     builder.set_boolean(field, reader.read_boolean(field));
                 }
             };
@@ -2348,8 +2351,8 @@ field_operations::get(field_kind kind)
                 []{
                     return Bits::FLOAT_SIZE_IN_BYTES;
                 },
-                [](default_compact_writer&, const generic_record&, const std::string&){},
-                [](compact_reader& reader, generic_record_builder& builder, const std::string& field){
+                [](default_compact_writer&, const generic_record::generic_record&, const std::string&){},
+                [](compact_reader& reader, generic_record::generic_record_builder& builder, const std::string& field){
                     builder.set_boolean(field, reader.read_boolean(field));
                 }
             };
@@ -2358,8 +2361,8 @@ field_operations::get(field_kind kind)
                 []{
                     return Bits::DOUBLE_SIZE_IN_BYTES;
                 },
-                [](default_compact_writer&, const generic_record&, const std::string&){},
-                [](compact_reader& reader, generic_record_builder& builder, const std::string& field){
+                [](default_compact_writer&, const generic_record::generic_record&, const std::string&){},
+                [](compact_reader& reader, generic_record::generic_record_builder& builder, const std::string& field){
                     builder.set_boolean(field, reader.read_boolean(field));
                 }
             };
@@ -2368,10 +2371,10 @@ field_operations::get(field_kind kind)
                 []{
                     return field_kind_based_operations::VARIABLE_SIZE;
                 },
-                [](default_compact_writer& writer, const generic_record& record, const std::string& field){
+                [](default_compact_writer& writer, const generic_record::generic_record& record, const std::string& field){
                     writer.write_string(field, record.get_string(field));
                 },
-                [](compact_reader& reader, generic_record_builder& builder, const std::string& field){
+                [](compact_reader& reader, generic_record::generic_record_builder& builder, const std::string& field){
                     builder.set_string(field, reader.read_string(field));
                 }
             };
@@ -2380,10 +2383,10 @@ field_operations::get(field_kind kind)
                 []{
                     return field_kind_based_operations::VARIABLE_SIZE;
                 },
-                [](default_compact_writer& writer, const generic_record& record, const std::string& field){
+                [](default_compact_writer& writer, const generic_record::generic_record& record, const std::string& field){
                     writer.write_array_of_boolean(field, record.get_array_of_boolean(field));
                 },
-                [](compact_reader& reader, generic_record_builder& builder, const std::string& field){
+                [](compact_reader& reader, generic_record::generic_record_builder& builder, const std::string& field){
                     builder.set_array_of_boolean(field, reader.read_array_of_boolean(field));
                 }
             };
@@ -2392,10 +2395,10 @@ field_operations::get(field_kind kind)
                 []{
                     return field_kind_based_operations::VARIABLE_SIZE;
                 },
-                [](default_compact_writer& writer, const generic_record& record, const std::string& field){
+                [](default_compact_writer& writer, const generic_record::generic_record& record, const std::string& field){
                     writer.write_array_of_string(field, record.get_array_of_string(field));
                 },
-                [](compact_reader& reader, generic_record_builder& builder, const std::string& field){
+                [](compact_reader& reader, generic_record::generic_record_builder& builder, const std::string& field){
                     builder.set_array_of_string(field, reader.read_array_of_string(field));
                 }
             };
@@ -2404,11 +2407,11 @@ field_operations::get(field_kind kind)
                 []{
                     return field_kind_based_operations::VARIABLE_SIZE;
                 },
-                [](default_compact_writer& writer, const generic_record& record, const std::string& field){
+                [](default_compact_writer& writer, const generic_record::generic_record& record, const std::string& field){
                     writer.write_array_of_compact(field, record.get_array_of_generic_record(field));
                 },
-                [](compact_reader& reader, generic_record_builder& builder, const std::string& field){
-                    builder.set_array_of_generic_record(field, reader.read_array_of_compact<generic_record>(field));
+                [](compact_reader& reader, generic_record::generic_record_builder& builder, const std::string& field){
+                    builder.set_array_of_generic_record(field, reader.read_array_of_compact<generic_record::generic_record>(field));
                 }
             };
         default:

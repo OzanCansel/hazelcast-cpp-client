@@ -815,7 +815,7 @@ public:
 
     template<typename T>
     typename std::enable_if<
-      std::is_same<generic_record, T>::value,
+      std::is_same<generic_record::generic_record, T>::value,
       boost::optional<T>>::type read_object(int32_t type_id);
 
     /**
@@ -831,7 +831,7 @@ public:
         std::is_base_of<compact_serializer, hz_serializer<T>>::value ||
         std::is_base_of<builtin_serializer, hz_serializer<T>>::value ||
         std::is_base_of<custom_serializer, hz_serializer<T>>::value ||
-        std::is_same<generic_record, T>::value),
+        std::is_same<generic_record::generic_record, T>::value),
       boost::optional<T>>::type inline read_object(int32_t type_id);
 
 private:
@@ -893,7 +893,7 @@ public:
 
     template<typename T>
     typename std::enable_if<
-      std::is_same<generic_record, T>::value>::type
+      std::is_same<generic_record::generic_record, T>::value>::type
     write_object(const T& object);
 
     template<typename T>
@@ -913,7 +913,7 @@ public:
         std::is_base_of<portable_serializer, hz_serializer<T>>::value ||
         std::is_base_of<compact_serializer, hz_serializer<T>>::value ||
         std::is_base_of<custom_serializer, hz_serializer<T>>::value ||
-        std::is_same<generic_record, T>::value ||
+        std::is_same<generic_record::generic_record, T>::value ||
         (std::is_array<T>::value &&
          std::is_same<typename std::remove_all_extents<T>::type, char>::value)),
       void>::type inline write_object(const T object);
@@ -2368,14 +2368,14 @@ typename std::enable_if<
 
 template<typename T>
 typename std::enable_if<
-  std::is_same<generic_record, T>::value>::type
+  std::is_same<generic_record::generic_record, T>::value>::type
 object_data_output::write_object(const T& object)
 {
     if (is_no_write_) {
         return;
     }
 
-    const generic_record& record = static_cast<const generic_record&>(object);
+    const auto& record = static_cast<const generic_record::generic_record&>(object);
 
     write(static_cast<int32_t>(
             pimpl::serialization_constants::CONSTANT_TYPE_COMPACT),
@@ -2396,7 +2396,7 @@ typename std::enable_if<
     std::is_base_of<portable_serializer, hz_serializer<T>>::value ||
     std::is_base_of<compact_serializer, hz_serializer<T>>::value ||
     std::is_base_of<custom_serializer, hz_serializer<T>>::value ||
-    std::is_same<generic_record, T>::value ||
+    std::is_same<generic_record::generic_record, T>::value ||
     (std::is_array<T>::value &&
      std::is_same<typename std::remove_all_extents<T>::type, char>::value)),
   void>::type inline object_data_output::write_object(const T object)
@@ -2520,7 +2520,7 @@ typename std::enable_if<
 
 template<typename T>
     typename std::enable_if<
-      std::is_same<generic_record, T>::value,
+      std::is_same<generic_record::generic_record, T>::value,
       boost::optional<T>>::type object_data_input::read_object(int32_t
                                                                   type_id)
 {
@@ -2534,7 +2534,7 @@ typename std::enable_if<
     std::is_base_of<compact_serializer, hz_serializer<T>>::value ||
     std::is_base_of<builtin_serializer, hz_serializer<T>>::value ||
     std::is_base_of<custom_serializer, hz_serializer<T>>::value ||
-    std::is_same<generic_record, T>::value),
+    std::is_same<generic_record::generic_record, T>::value),
   boost::optional<T>>::type inline object_data_input::read_object(int32_t
                                                                     type_id)
 {
