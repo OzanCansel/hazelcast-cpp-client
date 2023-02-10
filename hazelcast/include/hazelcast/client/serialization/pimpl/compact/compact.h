@@ -20,6 +20,7 @@
 // serialization.h not in the beginning but later to avoid cyclic dependency.
 
 #include <boost/thread/future.hpp>
+#include <boost/property_tree/ptree.hpp>
 #include <utility>
 #include "hazelcast/util/export.h"
 #include "hazelcast/client/serialization/serialization.h"
@@ -1400,8 +1401,18 @@ private:
 struct HAZELCAST_API field_kind_based_operations
 {
     using kind_size_in_bytes_fn = std::function<int()>;
-    using write_field_from_record_to_writer_fn = std::function<void(default_compact_writer&, const generic_record::generic_record&, const std::string& field)>;
-    using read_generic_record_or_primitive_fn = std::function<void(compact_reader&, generic_record::generic_record_builder&, const std::string& field)>;
+    using write_field_from_record_to_writer_fn =
+      std::function<void(default_compact_writer&,
+                         const generic_record::generic_record&,
+                         const std::string&)>;
+    using read_generic_record_or_primitive_fn =
+      std::function<void(compact_reader&,
+                         generic_record::generic_record_builder&,
+                         const std::string&)>;
+    using write_json_formatted_field_fn =
+      std::function<void(boost::property_tree::ptree&,
+                         const generic_record::generic_record&,
+                         const std::string&)>;
 
     static constexpr int VARIABLE_SIZE = -1;
 
@@ -1409,14 +1420,15 @@ struct HAZELCAST_API field_kind_based_operations
 
     field_kind_based_operations();
 
-    explicit field_kind_based_operations(
-      kind_size_in_bytes_fn,
-      write_field_from_record_to_writer_fn,
-      read_generic_record_or_primitive_fn);
+    explicit field_kind_based_operations(kind_size_in_bytes_fn,
+                                         write_field_from_record_to_writer_fn,
+                                         read_generic_record_or_primitive_fn,
+                                         write_json_formatted_field_fn);
 
     kind_size_in_bytes_fn kind_size_in_byte_func;
     write_field_from_record_to_writer_fn write_field_from_record_to_writer;
     read_generic_record_or_primitive_fn read_generic_record_or_primitive;
+    write_json_formatted_field_fn write_json_formatted_field;
 };
 
 struct HAZELCAST_API field_operations
