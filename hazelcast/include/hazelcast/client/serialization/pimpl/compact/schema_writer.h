@@ -31,8 +31,8 @@ public:
     schema build() &&;
 
 private:
-    std::unordered_map<std::string, field_descriptor> field_definition_map;
-    std::string type_name;
+    std::unordered_map<std::string, field_descriptor> field_definition_map_;
+    std::string type_name_;
 };
 
 }

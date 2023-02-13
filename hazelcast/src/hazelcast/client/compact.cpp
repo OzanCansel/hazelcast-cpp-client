@@ -3269,19 +3269,19 @@ compact_util::exception_for_unexpected_null_value_in_array(
 }
 
 schema_writer::schema_writer(std::string type_name)
-  : type_name(std::move(type_name))
+  : type_name_(std::move(type_name))
 {}
 
 void
 schema_writer::add_field(std::string field_name, enum field_kind kind)
 {
-    field_definition_map[std::move(field_name)] = field_descriptor{ kind };
+    field_definition_map_[std::move(field_name)] = field_descriptor{ kind };
 }
 
 schema
 schema_writer::build() &&
 {
-    return schema{ type_name, std::move(field_definition_map) };
+    return schema{ type_name_, std::move(field_definition_map_) };
 }
 
 default_schema_service::default_schema_service(spi::ClientContext& context)
