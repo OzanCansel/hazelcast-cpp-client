@@ -1387,7 +1387,7 @@ public:
     template<typename T>
     T read(object_data_input& in);
 
-    inline generic_record::generic_record read_generic_record(object_data_input& in);
+    generic_record::generic_record read_generic_record(object_data_input& in);
 
     template<typename T>
     void write(const T& object, object_data_output& out);
