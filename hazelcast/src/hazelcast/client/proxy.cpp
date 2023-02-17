@@ -1125,21 +1125,19 @@ flake_id_generator_impl::new_id_internal()
 {
     auto b = block_.load();
     if (b) {
-        int64_t res = b->next();
-        if (res != INT64_MIN) {
-            return res;
-        }
+        return b->next();
     }
 
-    throw std::overflow_error("");
+	return INT64_MIN;
 }
 
 boost::future<int64_t>
 flake_id_generator_impl::new_id()
 {
-    try {
-        return boost::make_ready_future(new_id_internal());
-    } catch (std::overflow_error&) {
+    int64_t value = new_id_internal();
+    if (INT64_MIN != value) {
+        return boost::make_ready_future(value);
+    } else {
         return new_id_batch(batch_size_)
           .then(boost::launch::sync,
                 [=](boost::future<flake_id_generator_impl::IdBatch> f) {
@@ -1150,7 +1148,7 @@ flake_id_generator_impl::new_id()
                     block_.compare_exchange_strong(b, newBlock);
                     return value;
                 });
-    }
+	}
 }
 
 boost::future<flake_id_generator_impl::IdBatch>
