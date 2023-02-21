@@ -1175,6 +1175,7 @@ Connection::handle_client_message(
         return;
     }
     auto invocation = invocationIterator->second;
+    socket_->message_received(correlationId);
     auto flags = message->get_header_flags();
     if (message->is_flag_set(flags,
                              protocol::ClientMessage::BACKUP_EVENT_FLAG)) {

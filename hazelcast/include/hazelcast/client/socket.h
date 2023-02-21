@@ -64,6 +64,8 @@ public:
     virtual const address& get_remote_endpoint() const = 0;
 
     virtual boost::asio::io_context::strand& get_executor() noexcept = 0;
+
+	virtual void message_received(int64_t correlation_id) { (void)correlation_id; }
 };
 } // namespace client
 } // namespace hazelcast

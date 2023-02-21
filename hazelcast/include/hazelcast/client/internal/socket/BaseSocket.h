@@ -122,15 +122,17 @@ public:
                 return;
             }
 
-            add_invocation_to_map(connection, invocation, message);
+            auto correlation_id = add_invocation_to_map(connection, invocation, message);
 
             auto& datas = message->get_buffer();
-            std::vector<boost::asio::const_buffer> buffers;
-            buffers.reserve(datas.size());
+            entry e;
+            e.id = correlation_id;
+            e.invocation = invocation;
+            e.buffers.reserve(datas.size());
             for (const auto& data : datas) {
-                buffers.emplace_back(boost::asio::buffer(data));
+                e.buffers.emplace_back(boost::asio::buffer(data));
             }
-            this->outbox_.push_back(buffers);
+            this->outbox_.push_back(std::move(e));
 
             if (this->outbox_.size() > 1) {
                 // async write is in progress
@@ -271,7 +273,7 @@ protected:
         const auto& message = outbox_[0];
 
         boost::asio::async_write(
-          socket_, message, socket_strand_.wrap(handler));
+          socket_, message.buffers, socket_strand_.wrap(handler));
     }
 
     virtual void post_connect() {}
@@ -313,7 +315,7 @@ protected:
         return c_id_union.id;
     }
 
-    inline void add_invocation_to_map(
+    inline int64_t add_invocation_to_map(
       const std::shared_ptr<connection::Connection>& connection,
       const std::shared_ptr<spi::impl::ClientInvocation>& invocation,
       std::shared_ptr<protocol::ClientMessage> message)
@@ -326,7 +328,20 @@ protected:
              .second);
 
         message->set_correlation_id(message_call_id);
+
+		return message_call_id;
     }
+
+	void message_received(int64_t correlation_id) override{
+        auto exist = std::any_of(
+            begin(outbox_), end(outbox_), [correlation_id](const entry& e) {
+                return e.id == correlation_id;
+            });
+
+		if (exist) {
+            std::cout << "Bug has been found. " << correlation_id << std::endl;
+		}
+	}
 
     client::config::socket_options& socket_options_;
     address remote_endpoint_;
@@ -336,7 +351,15 @@ protected:
     boost::asio::ip::tcp::resolver& resolver_;
     T socket_;
     int32_t call_id_counter_{ 0 };
-    typedef std::deque<std::vector<boost::asio::const_buffer>> Outbox;
+
+public:
+	struct entry
+	{
+        std::shared_ptr<spi::impl::ClientInvocation> invocation;
+        std::vector<boost::asio::const_buffer> buffers;
+        int64_t id;
+	};
+    typedef std::deque<entry> Outbox;
     Outbox outbox_;
 };
 } // namespace socket
