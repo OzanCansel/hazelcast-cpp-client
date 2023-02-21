@@ -130,6 +130,7 @@ public:
             for (const auto& data : datas) {
                 buffers.emplace_back(boost::asio::buffer(data));
             }
+			// TODO: Optimize
             this->outbox_.push_back(buffers);
 
             if (this->outbox_.size() > 1) {
@@ -270,8 +271,10 @@ protected:
 
         const auto& message = outbox_[0];
 
-        boost::asio::async_write(
-          socket_, message, socket_strand_.wrap(handler));
+
+		boost::system::error_code ec;
+		boost::asio::write(socket_, message, ec);
+        handler(ec, 0);
     }
 
     virtual void post_connect() {}
