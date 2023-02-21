@@ -125,14 +125,11 @@ public:
             add_invocation_to_map(connection, invocation, message);
 
             auto& datas = message->get_buffer();
-            std::vector<boost::asio::const_buffer> buffers;
-            buffers.reserve(datas.size());
-            for (const auto& data : datas) {
-                buffers.emplace_back(boost::asio::buffer(data));
-            }
-            this->outbox_.push_back(buffers);
 
-            if (this->outbox_.size() > 1) {
+			bool was_empty = outbox_.empty();
+			copy(begin(datas), end(datas), back_inserter(outbox_));
+
+            if (!was_empty) {
                 // async write is in progress
                 return;
             }
@@ -268,10 +265,8 @@ protected:
               }
           };
 
-        const auto& message = outbox_[0];
-
         boost::asio::async_write(
-          socket_, message, socket_strand_.wrap(handler));
+          socket_, boost::asio::buffer(outbox_.front()), socket_strand_.wrap(handler));
     }
 
     virtual void post_connect() {}
@@ -336,7 +331,7 @@ protected:
     boost::asio::ip::tcp::resolver& resolver_;
     T socket_;
     int32_t call_id_counter_{ 0 };
-    typedef std::deque<std::vector<boost::asio::const_buffer>> Outbox;
+    typedef std::deque<std::vector<byte>> Outbox;
     Outbox outbox_;
 };
 } // namespace socket
