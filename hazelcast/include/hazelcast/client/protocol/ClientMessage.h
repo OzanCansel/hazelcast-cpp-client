@@ -1351,6 +1351,7 @@ public:
 
     friend std::ostream HAZELCAST_API& operator<<(std::ostream& os,
                                                   const ClientMessage& message);
+    std::shared_ptr<ClientMessage> self;
 
 private:
     static const frame_header_type NULL_FRAME;

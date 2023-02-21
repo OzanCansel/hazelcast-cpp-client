@@ -1372,6 +1372,8 @@ ClientInvocation::ClientInvocation(
     message->set_partition_id(partition_id_);
     client_message_ =
       boost::make_shared<std::shared_ptr<protocol::ClientMessage>>(message);
+    client_message_.load().get()->get()->self =
+      *client_message_.load().get();
     set_send_connection(nullptr);
 }
 
