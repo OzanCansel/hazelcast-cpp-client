@@ -196,6 +196,10 @@ $ conan install ..
 ```
 This generates the `conanbuildinfo.cmake` file to be included in your CMakeLists.txt. Please follow the instructions at the [example page](https://docs.conan.io/en/latest/getting_started.html#an-md5-hash-calculator-using-the-poco-libraries) and build your application.
 
+`conan install` might fail on some architechtures, in case it fails run as:
+`conan install .. --build=missing`
+So it is built from scratch. Also make sure that `cmake`, `a compiler` and `openssl` is installed on your system.
+
 ### 1.1.2. Vcpkg Users
 Hazelcast C++ client package is available for [Vcpkg](https://github.com/microsoft/vcpkg) users. The port name is `hazelcast-cpp-client`.
 
