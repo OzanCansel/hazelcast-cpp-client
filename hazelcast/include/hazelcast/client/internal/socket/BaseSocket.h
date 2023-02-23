@@ -127,6 +127,7 @@ public:
             auto& datas = message->get_buffer();
             entry e;
             e.id = correlation_id;
+            e.message = message;
             e.invocation = invocation;
             e.buffers.reserve(datas.size());
             for (const auto& data : datas) {
@@ -355,6 +356,7 @@ protected:
 public:
 	struct entry
 	{
+        std::shared_ptr<protocol::ClientMessage> message;
         std::shared_ptr<spi::impl::ClientInvocation> invocation;
         std::vector<boost::asio::const_buffer> buffers;
         int64_t id;
