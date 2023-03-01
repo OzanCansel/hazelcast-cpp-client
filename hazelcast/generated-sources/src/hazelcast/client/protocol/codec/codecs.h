@@ -3093,12 +3093,6 @@ client_sendallschemas_encode(
   const std::vector<serialization::pimpl::schema>& schemas);
 
 /**
- * Sends all the schemas to the cluster
- */
-ClientMessage HAZELCAST_API
-client_sendallschemas_encode(const std::vector<serialization::pimpl::schema>& schemas);
-
-/**
  * Fetches a schema from the cluster with the given schemaId
  */
 ClientMessage HAZELCAST_API
