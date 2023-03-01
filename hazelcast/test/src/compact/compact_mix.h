@@ -22,9 +22,9 @@ class CompactMix : public compact_test_base
 
 TEST_F(CompactMix, schema_service_get_non_existing_schema)
 {
-    spi::ClientContext ctx {client};
+    spi::ClientContext ctx{ client };
 
-    serialization::pimpl::default_schema_service service {ctx};
+    serialization::pimpl::default_schema_service service{ ctx };
 
     ASSERT_THROW(service.get(1000), exception::illegal_state);
 }
@@ -48,7 +48,7 @@ TEST_F(CompactMix, schema_inequality)
 TEST_F(CompactMix, field_kind_output)
 {
     using field_kind = serialization::field_kind;
-    auto to_string = [](field_kind kind){
+    auto to_string = [](field_kind kind) {
         std::ostringstream os;
 
         os << kind;
@@ -80,26 +80,34 @@ TEST_F(CompactMix, field_kind_output)
     EXPECT_EQ(to_string(field_kind::ARRAY_OF_DATE), "ARRAY_OF_DATE");
     EXPECT_EQ(to_string(field_kind::TIMESTAMP), "TIMESTAMP");
     EXPECT_EQ(to_string(field_kind::ARRAY_OF_TIMESTAMP), "ARRAY_OF_TIMESTAMP");
-    EXPECT_EQ(to_string(field_kind::TIMESTAMP_WITH_TIMEZONE), "TIMESTAMP_WITH_TIMEZONE");
-    EXPECT_EQ(to_string(field_kind::ARRAY_OF_TIMESTAMP_WITH_TIMEZONE), "ARRAY_OF_TIMESTAMP_WITH_TIMEZONE");
+    EXPECT_EQ(to_string(field_kind::TIMESTAMP_WITH_TIMEZONE),
+              "TIMESTAMP_WITH_TIMEZONE");
+    EXPECT_EQ(to_string(field_kind::ARRAY_OF_TIMESTAMP_WITH_TIMEZONE),
+              "ARRAY_OF_TIMESTAMP_WITH_TIMEZONE");
     EXPECT_EQ(to_string(field_kind::COMPACT), "COMPACT");
     EXPECT_EQ(to_string(field_kind::ARRAY_OF_COMPACT), "ARRAY_OF_COMPACT");
     EXPECT_EQ(to_string(field_kind::NULLABLE_BOOLEAN), "NULLABLE_BOOLEAN");
-    EXPECT_EQ(to_string(field_kind::ARRAY_OF_NULLABLE_BOOLEAN), "ARRAY_OF_NULLABLE_BOOLEAN");
+    EXPECT_EQ(to_string(field_kind::ARRAY_OF_NULLABLE_BOOLEAN),
+              "ARRAY_OF_NULLABLE_BOOLEAN");
     EXPECT_EQ(to_string(field_kind::NULLABLE_INT8), "NULLABLE_INT8");
-    EXPECT_EQ(to_string(field_kind::ARRAY_OF_NULLABLE_INT8), "ARRAY_OF_NULLABLE_INT8");
+    EXPECT_EQ(to_string(field_kind::ARRAY_OF_NULLABLE_INT8),
+              "ARRAY_OF_NULLABLE_INT8");
     EXPECT_EQ(to_string(field_kind::NULLABLE_INT16), "NULLABLE_INT16");
-    EXPECT_EQ(to_string(field_kind::ARRAY_OF_NULLABLE_INT16), "ARRAY_OF_NULLABLE_INT16");
+    EXPECT_EQ(to_string(field_kind::ARRAY_OF_NULLABLE_INT16),
+              "ARRAY_OF_NULLABLE_INT16");
     EXPECT_EQ(to_string(field_kind::NULLABLE_INT32), "NULLABLE_INT32");
-    EXPECT_EQ(to_string(field_kind::ARRAY_OF_NULLABLE_INT32), "ARRAY_OF_NULLABLE_INT32");
+    EXPECT_EQ(to_string(field_kind::ARRAY_OF_NULLABLE_INT32),
+              "ARRAY_OF_NULLABLE_INT32");
     EXPECT_EQ(to_string(field_kind::NULLABLE_INT64), "NULLABLE_INT64");
     EXPECT_EQ(to_string(field_kind::NULLABLE_FLOAT32), "NULLABLE_FLOAT32");
-    EXPECT_EQ(to_string(field_kind::ARRAY_OF_NULLABLE_FLOAT32), "ARRAY_OF_NULLABLE_FLOAT32");
+    EXPECT_EQ(to_string(field_kind::ARRAY_OF_NULLABLE_FLOAT32),
+              "ARRAY_OF_NULLABLE_FLOAT32");
     EXPECT_EQ(to_string(field_kind::NULLABLE_FLOAT64), "NULLABLE_FLOAT64");
-    EXPECT_EQ(to_string(field_kind::ARRAY_OF_NULLABLE_FLOAT64), "ARRAY_OF_NULLABLE_FLOAT64");
+    EXPECT_EQ(to_string(field_kind::ARRAY_OF_NULLABLE_FLOAT64),
+              "ARRAY_OF_NULLABLE_FLOAT64");
 }
 
-}
-}
-}
-}
+} // namespace compact
+} // namespace test
+} // namespace client
+} // namespace hazelcast

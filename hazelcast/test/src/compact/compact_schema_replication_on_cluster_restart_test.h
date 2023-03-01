@@ -51,7 +51,11 @@ protected:
           Lang::JAVASCRIPT);
 
         if (response.result.empty()) {
-            (void)[]{ GTEST_FAIL(); }();
+            (void)[]
+            {
+                GTEST_FAIL();
+            }
+            ();
         }
 
         return std::stoi(response.result);
@@ -75,17 +79,16 @@ TEST_F(CompactSchemaReplicationOnClusterRestart, on_cluster_restart)
                            check_schema_on_backend(schema_child));
 }
 
-TEST_F(CompactSchemaReplicationOnClusterRestart, dont_replicate_if_there_are_no_schema_on_cluster_restart)
+TEST_F(CompactSchemaReplicationOnClusterRestart,
+       dont_replicate_if_there_are_no_schema_on_cluster_restart)
 {
-    auto condition = [this](){
-        return number_of_schemas_on_member() == 0;
-    };
+    auto condition = [this]() { return number_of_schemas_on_member() == 0; };
 
     ASSERT_TRUE_EVENTUALLY(condition());
 
     member_.shutdown();
 
-    HazelcastServer another_member{factory_};
+    HazelcastServer another_member{ factory_ };
 
     ASSERT_TRUE_EVENTUALLY(condition());
 }
