@@ -41,6 +41,7 @@
 #include "hazelcast/client/spi/impl/ClientInvocation.h"
 #include "hazelcast/client/spi/impl/ClientInvocationServiceImpl.h"
 #include "hazelcast/client/impl/hazelcast_client_instance_impl.h"
+#include "hazelcast/client/impl/statistics/Statistics.h"
 #include "hazelcast/client/spi/impl/ClientPartitionServiceImpl.h"
 #include "hazelcast/client/spi/impl/DefaultAddressProvider.h"
 #include "hazelcast/client/spi/impl/sequence/CallIdSequenceWithBackpressure.h"
@@ -2994,6 +2995,7 @@ cluster_view_listener::try_register(
     auto conn_id = connection->get_connection_id();
 
     invocation->invoke_urgent().then(
+      boost::launch::sync,
       [weak_self, handler, conn_id](boost::future<protocol::ClientMessage> f) {
           auto self = weak_self.lock();
           if (!self)
