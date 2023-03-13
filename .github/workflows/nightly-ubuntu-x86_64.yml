@@ -38,7 +38,8 @@ jobs:
             name: SSL
 
     runs-on: ubuntu-latest
-
+    env:
+      JOB_NAME: Ubuntu-x86_64(${{ matrix.build_type.type }}-${{ matrix.shared_libs.name }}-${{matrix.boost.version}}-${{ matrix.with_openssl.name }})
     name: >-
       Ubuntu-x86_64
       (${{ matrix.build_type.type }}, ${{ matrix.shared_libs.name }}, ${{matrix.boost.version}}, ${{ matrix.with_openssl.name }})
@@ -48,6 +49,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y net-tools libssl-dev gdb curl
+          sudo chmod -R ugo+rw /usr/local
 
       - uses: actions/checkout@v2
 
@@ -55,11 +57,25 @@ jobs:
         run: |
           curl -H "Authorization: token ${{ secrets.GH_TOKEN }}" https://raw.githubusercontent.com/hazelcast/private-test-artifacts/data/certs.jar > hazelcast-enterprise-5.2.0-tests.jar
 
-      - name: Install Boost
+      - name: Cache Thrift and Boost
+        id: cache-thrift-boost
+        uses: actions/cache@v3
+        with:
+          key: ${{ env.JOB_NAME }}-thrift-boost
+          path: |
+            /usr/local/include/boost
+            /usr/local/include/thrift
+            /usr/local/lib/cmake
+            /usr/local/lib/*.so
+            /usr/local/lib/pkgconfig
+
+      - if: ${{ steps.cache-thrift-boost.outputs.cache-hit != 'true' }}
+        name: Install Boost
         run: |
           sudo ./scripts/install-boost.sh ${{matrix.boost.version}}
 
-      - name: Install Thrift
+      - if: ${{ steps.cache-thrift-boost.outputs.cache-hit != 'true' }}
+        name: Install Thrift
         run: |
           sudo ./scripts/install-thrift.sh 0.13.0
 
