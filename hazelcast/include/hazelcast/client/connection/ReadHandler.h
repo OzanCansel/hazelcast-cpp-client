@@ -53,7 +53,7 @@ public:
 
 private:
     protocol::ClientMessageBuilder<Connection> builder_;
-    std::atomic<std::chrono::steady_clock::duration> last_read_time_;
+    std::atomic<std::chrono::steady_clock::time_point> last_read_time_;
 };
 } // namespace connection
 } // namespace client

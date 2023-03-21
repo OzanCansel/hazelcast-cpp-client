@@ -400,8 +400,8 @@ lifecycle_service::shutdown()
         client_context_.get_proxy_manager().destroy();
         client_context_.get_connection_manager().shutdown();
         client_context_.get_client_cluster_service().shutdown();
-        client_context_.get_invocation_service().shutdown();
         client_context_.get_client_listener_service().shutdown();
+        client_context_.get_invocation_service().shutdown();
         client_context_.get_near_cache_manager().destroy_all_near_caches();
         fire_lifecycle_event(lifecycle_event::SHUTDOWN);
         client_context_.get_client_execution_service().shutdown();
@@ -1424,7 +1424,10 @@ ClientInvocation::ClientInvocation(
   , urgent_(false)
   , smart_routing_(invocation_service_.is_smart_routing())
 {
-    message->set_partition_id(partition_id_);
+    if (message->get_partition_id() == -1){
+        message->set_partition_id(partition_id_);
+    }
+
     client_message_ =
       boost::make_shared<std::shared_ptr<protocol::ClientMessage>>(message);
     set_send_connection(nullptr);
@@ -1621,7 +1624,7 @@ ClientInvocation::set_exception(const std::exception& e,
                 auto call_id =
                   client_message_.load()->get()->get_correlation_id();
                 boost::asio::post(
-                  connection->get_socket().get_executor(),
+                  connection->get_executor(),
                   [=]() { connection->deregister_invocation(call_id); });
             }
         }
@@ -1719,7 +1722,7 @@ ClientInvocation::erase_invocation() const
         auto sent_connection = get_send_connection();
         if (sent_connection) {
             auto this_invocation = shared_from_this();
-            boost::asio::post(sent_connection->get_socket().get_executor(),
+            boost::asio::post(sent_connection->get_executor(),
                               [=]() {
                                   sent_connection->invocations.erase(
                                     this_invocation->get_client_message()
@@ -2696,7 +2699,7 @@ listener_service_impl::remove_event_handler(
   int64_t call_id,
   const std::shared_ptr<connection::Connection>& connection)
 {
-    boost::asio::post(connection->get_socket().get_executor(),
+    boost::asio::post(connection->get_executor(),
                       std::packaged_task<void()>(
                         [=]() { connection->deregister_invocation(call_id); }));
 }
